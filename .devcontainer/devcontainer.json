@@ -1,0 +1,68 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/ubuntu
+{
+	"name": "Ubuntu",
+	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	"image": "mcr.microsoft.com/devcontainers/base:jammy",
+	"features": {
+		"ghcr.io/devcontainers/features/aws-cli:1": {},
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {},
+		"ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {},
+		"ghcr.io/devcontainers/features/node:1": {},
+		"ghcr.io/devcontainers/features/python:1": {},
+		"ghcr.io/devcontainers/features/terraform:1": {},
+		"ghcr.io/eitsupi/devcontainer-features/jq-likes:2": {},
+		"ghcr.io/devcontainers-extra/features/aws-cdk:2": {},
+		"ghcr.io/devcontainers-extra/features/curl-apt-get:1": {},
+		"ghcr.io/devcontainers-extra/features/wget-apt-get:1": {},
+		"ghcr.io/devcontainers-extra/features/gh-cli:1": {}
+	},
+	 "mounts": [
+    "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached"
+  	],
+  "postCreateCommand": {
+    // Install Q CLI
+    "q-install": "ARCH=$(uname -m); if [ \"$ARCH\" = \"aarch64\" ] || [ \"$ARCH\" = \"arm64\" ]; then DOWNLOAD_URL='https://desktop-release.q.us-east-1.amazonaws.com/latest/q-aarch64-linux.zip'; else DOWNLOAD_URL='https://desktop-release.q.us-east-1.amazonaws.com/latest/q-x86_64-linux.zip'; fi && curl --proto '=https' --tlsv1.2 -sSf \"$DOWNLOAD_URL\" -o 'q.zip' && unzip q.zip && sudo mv ./q/bin/q /usr/local/bin/ && sudo mv ./q/bin/qchat /usr/local/bin/ && sudo mv ./q/bin/qterm /usr/local/bin/ && rm -rf q.zip q",
+
+    // Set alias for qchat
+    "set alias for qchat": "echo 'alias q=\"/usr/local/bin/qchat\"' >> ~/.bashrc && echo 'alias q=\"/usr/local/bin/qchat\"' >> ~/.bash_profile && echo 'alias q=\"/usr/local/bin/qchat\"' >> ~/.zshrc && echo 'alias q=\"/usr/local/bin/qchat\"' >> ~/.profile",
+
+    //Pulls docker imagens for MCP
+    "pull mcp images": "docker pull mcp/duckduckgo && docker pull mcp/sequentialthinking",
+
+    // Install Gemini CLI
+    "install gemini cli": "npm install -g @google/gemini-cli && echo 'export PATH=\"$HOME/.npm-global/bin:$PATH\"' >> ~/.bashrc && echo 'export PATH=\"$HOME/.npm-global/bin:$PATH\"' >> ~/.bash_profile && echo 'export PATH=\"$HOME/.npm-global/bin:$PATH\"' >> ~/.zshrc",
+
+    // Install uv (includes uvx)
+    "install uv": "curl -LsSf https://astral.sh/uv/install.sh | sh && echo 'export PATH=\"$HOME/.cargo/bin:$PATH\"' >> ~/.bashrc && echo 'export PATH=\"$HOME/.cargo/bin:$PATH\"' >> ~/.bash_profile && echo 'export PATH=\"$HOME/.cargo/bin:$PATH\"' >> ~/.zshrc",
+
+    // Install Strands SDK, MCP CLI, and workshop utilities
+    "install strands sdk": "pip install dapr dapr-agents dapr-ext-workflow dapr-ext-fastapi flask-dapr",
+    // Setup MCP Inspector UI
+    "setup mcp inspector": "git clone https://github.com/modelcontextprotocol/inspector.git /home/vscode/inspector && cd /home/vscode/inspector && npm install",
+    // Install Dapr CLI
+    "install dapr cli": "wget -q https://raw.githubusercontent.com/dapr/cli/master/install/install.sh -O - | /bin/bash ",
+
+    // Install Diagrid CLI
+    "install diagrid cli": "curl -o- https://downloads.diagrid.io/cli/install.sh | bash && sudo mv ./diagrid /usr/local/bin"
+
+    // (Optional) Run MCP Inspector in background—invoke manually with 'npm run dev'
+    // "run mcp inspector": "cd /home/vscode/inspector && npm run dev &"
+  }
+
+
+	// Features to add to the dev container. More info: https://containers.dev/features.
+	// "features": {},
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	// "postCreateCommand": "uname -a",
+
+	// Configure tool-specific properties.
+	// "customizations": {},
+
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	// "remoteUser": "root"
+}
