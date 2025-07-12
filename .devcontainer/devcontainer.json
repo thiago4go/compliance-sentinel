@@ -44,7 +44,7 @@
     "install dapr cli": "wget -q https://raw.githubusercontent.com/dapr/cli/master/install/install.sh -O - | /bin/bash ",
 
     // Install Diagrid CLI
-    "install diagrid cli": "curl -o- https://downloads.diagrid.io/cli/install.sh | bash && sudo mv ./diagrid /usr/local/bin"
+    "install diagrid cli": "curl -o- https://downloads.diagrid.io/cli/install.sh | bash && mv ./diagrid /usr/local/bin"
 
     // (Optional) Run MCP Inspector in background—invoke manually with 'npm run dev'
     // "run mcp inspector": "cd /home/vscode/inspector && npm run dev &"

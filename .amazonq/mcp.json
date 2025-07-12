@@ -1,0 +1,32 @@
+{
+  "mcpServers": {
+    "rag-memory": {
+    "command": "node",
+        "args": ["/home/thiago/agentic-era/mcps/memory-mcp-rag/dist/index.js"],
+        "env": {},
+       "autoApprove": ["createEntities", "createRelations", "getKnowledgeGraphStats"]
+    }
+  },    
+  "duckduckgo": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "mcp/duckduckgo"
+      ]
+    },
+     "sequentialthinking": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "mcp/sequentialthinking"
+      ]
+    },
+     "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"]
+    }
+  }
