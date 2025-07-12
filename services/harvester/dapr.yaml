@@ -1,0 +1,18 @@
+version: 1
+common:
+  resourcesPath: ./components
+apps:
+  - appID: harvester-agent
+    appDirPath: .
+    appPort: 8000
+    command: ["python", "app.py"]
+    env:
+      APP_PORT: "8000"
+      APP_HOST: "0.0.0.0"
+      LOG_LEVEL: "INFO"
+      # Component names for local development
+      AGENT_STATE_STORE: "agentstatestore"
+      WORKFLOW_STATE_STORE: "workflowstatestore"
+      MESSAGE_PUBSUB: "messagepubsub"
+      CONVERSATION_STORE: "conversationstore"
+      SEARCH_RESULTS_STORE: "searchresultsstore"

@@ -4,7 +4,13 @@
     "command": "node",
         "args": ["/workspaces/compliance-sentinel/mcp-servers/rag-memory-mcp-postgresql/dist/index.js"],
             "env": {
-
+          "DB_TYPE": "postgresql",
+          "PG_HOST": "ep-odd-rice-a7lcfyr6-pooler.ap-southeast-2.aws.neon.tech",
+          "PG_PORT": "5432",
+          "PG_DATABASE": "darp-lite",
+          "PG_USERNAME": "darp-lite_owner",
+          "PG_PASSWORD": "npg_TDGMSwVKF4o6",
+          "PG_SSL": "true"
         },
        "autoApprove": ["createEntities", "createRelations", "getKnowledgeGraphStats"]
     },    
@@ -29,6 +35,10 @@
      "context7": {
       "command": "npx",
       "args": ["-y", "@upstash/context7-mcp@latest"]
+    },
+        "deepwiki": {
+      "httpUrl": "https://mcp.deepwiki.com/mcp",
+      "timeout": 500000
     }
   }
 }
