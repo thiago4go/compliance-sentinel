@@ -4,7 +4,7 @@
     "command": "node",
         "args": ["/workspaces/compliance-sentinel/mcp-servers/rag-memory-mcp-postgresql/dist/index.js"],
             "env": {
- 
+
         },
        "autoApprove": ["createEntities", "createRelations", "getKnowledgeGraphStats"]
     },    
@@ -26,7 +26,7 @@
         "mcp/sequentialthinking"
       ]
     },
-      "context7": {
+     "context7": {
       "command": "npx",
       "args": ["-y", "@upstash/context7-mcp@latest"]
     }
