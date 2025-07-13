@@ -1,0 +1,21 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: agentstatestore
+spec:
+  type: state.redis
+  version: v1
+  metadata:
+  - name: redisHost
+    value: redis:6379
+  - name: redisPassword
+    value: ""
+  - name: enableTLS
+    value: false
+  - name: keyPrefix
+    value: "agent:"
+  - name: actorStateStore
+    value: "true"
+scopes:
+- harvester-insights-agent
+- workflow-agent

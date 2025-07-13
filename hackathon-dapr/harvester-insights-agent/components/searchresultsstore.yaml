@@ -1,0 +1,18 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: searchresultsstore
+spec:
+  type: state.redis
+  version: v1
+  metadata:
+  - name: redisHost
+    value: redis:6379
+  - name: redisPassword
+    value: ""
+  - name: enableTLS
+    value: false
+  - name: keyPrefix
+    value: "search:"
+scopes:
+- harvester-insights-agent

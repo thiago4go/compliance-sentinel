@@ -1,0 +1,20 @@
+apiVersion: dapr.io/v1alpha1
+kind: Configuration
+metadata:
+  name: harvester-config
+spec:
+  tracing:
+    samplingRate: "1"
+  metric:
+    enabled: true
+  features:
+    - name: "pubsub.messagedelivery.enabled"
+      enabled: true
+  accessControl:
+    defaultAction: allow
+    trustDomain: "public"
+    policies:
+    - appId: harvester-insights-agent
+      defaultAction: allow
+      trustDomain: 'public'
+      namespace: "default"
