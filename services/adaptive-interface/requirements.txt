@@ -1,3 +1,9 @@
+dapr-agents>=0.5.0
+python-dotenv
+requests
+chainlit
+pydantic>=2.0.0
+httpx
 fastapi
-dapr
 uvicorn
+aiofiles

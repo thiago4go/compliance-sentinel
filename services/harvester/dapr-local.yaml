@@ -1,0 +1,29 @@
+version: 1
+common:
+  resourcesPath: ./components-local
+apps:
+- appID: harvester-agent
+  appDirPath: .
+  appPort: 8000
+  command: [ "python", "app_health_test.py" ]
+  env:
+    APP_PORT: "8000"
+    APP_HOST: "0.0.0.0"
+    LOG_LEVEL: "INFO"
+
+    # API Keys for local testing
+    OPENROUTER_API_KEY: "sk-your-default-api-key"
+    OPENROUTER_MODEL: "openai/gpt-4o"
+
+    # MCP Server Configuration
+    MCP_SERVER_URL: "http://138.3.218.137/ddg/mcp"
+
+    # Local Component Names
+    AGENT_STATE_STORE: "local-state-store"
+    WORKFLOW_STATE_STORE: "local-state-store"
+    MESSAGE_PUBSUB: "local-pubsub"
+    CONVERSATION_STORE: "local-state-store"
+    SEARCH_RESULTS_STORE: "local-state-store"
+
+    # Agent Configuration
+    AGENT_MAX_SEARCH_RESULTS: "10"

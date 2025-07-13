@@ -1,1 +1,68 @@
+# Environment files with secrets
 .env
+.env.local
+.env.*.local
+.env.production
+.env.staging
+.env.development
+
+# Secret files
+secrets/
+*.key
+*.pem
+*.p12
+*.pfx
+*.jks
+*.keystore
+config/secrets.yaml
+config/credentials.json
+
+# Database configs with credentials
+database.conf
+db.conf
+pg_service.conf
+
+# Cloud provider configs
+.aws/credentials
+.azure/
+.gcloud/
+gcp-credentials.json
+azure-credentials.json
+
+# API keys and tokens
+api-keys.txt
+tokens.txt
+.secrets
+credentials.ini
+
+# Temporary secret files
+temp-secrets.*
+*.secret
+*.credential
+
+# MCP configs that might contain secrets
+.amazonq/mcp.json
+.mcp.json
+mcp-config.json
+mcp-secrets.json
+.gemini/settings.json
+# Git-crypt
+.git-crypt/
+
+# IDE secret storage
+.vscode/settings.json
+.idea/
+
+# Logs that might contain secrets
+*.log
+logs/
+debug.log
+
+# Backup files that might contain secrets
+*.bak
+*.backup
+*.old
+
+# OS generated files
+.DS_Store
+Thumbs.db

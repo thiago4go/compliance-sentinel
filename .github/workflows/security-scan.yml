@@ -1,0 +1,63 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Run Gitleaks
+      uses: gitleaks/gitleaks-action@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+
+    - name: Run TruffleHog
+      uses: trufflesecurity/trufflehog@main
+      with:
+        path: ./
+        base: main
+        head: HEAD
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install detect-secrets
+      run: |
+        pip install detect-secrets
+
+    - name: Run detect-secrets
+      run: |
+        detect-secrets scan --all-files --baseline .secrets.baseline
+
+    - name: Custom Secret Scanner
+      run: |
+        chmod +x scripts/scan-secrets.sh
+        # Run on all files for CI (not just staged)
+        git diff --name-only HEAD~1 HEAD > changed_files.txt || echo "." > changed_files.txt
+        if [ -s changed_files.txt ]; then
+          echo "Files to scan:"
+          cat changed_files.txt
+          
+          # Check each changed file
+          while read -r file; do
+            if [ -f "$file" ]; then
+              echo "Scanning: $file"
+              if grep -E "(PG_PASSWORD|PG_HOST.*ep-.*\.aws\.neon\.tech|sk-[a-zA-Z0-9-_]{20,})" "$file"; then
+                echo "❌ Secrets detected in $file"
+                exit 1
+              fi
+            fi
+          done < changed_files.txt
+        fi
+        echo "✅ No secrets detected"
