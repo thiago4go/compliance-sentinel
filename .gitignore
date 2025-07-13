@@ -66,3 +66,23 @@ debug.log
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# Large files from dapr-agents
+dapr-agents/docs/img/workflows_llm_zipkin_spans_start.png
+dapr-agents/docs/img/workflows_llm_redis_workflow_state_edit_mode.png
+dapr-agents/docs/img/workflows_llm_redis_workflow_state.png
+dapr-agents/docs/img/workflows_llm_console_logs_activities.png
+dapr-agents/docs/img/workflows_llm_orchestrator_initialization.png
+dapr-agents/docs/img/home_installation_redis_dashboard.png
+dapr-agents/docs/img/workflows_llm_redis_broadcast_channel.png
+dapr-agents/dapr_agents/workflow/orchestrators/orchestratorWorkflows.png
+dapr-agents/uv.lock
+dapr-agents/dapr_agents/workflow/orchestrators/orchestratorWorkflows.svg
+dapr-agents/docs/img/workflows_roundrobin_redis_broadcast_channel.png
+dapr-agents/docs/img/workflows_llm_console_logs_activities_chat_completions.png
+
+# Files with security violations (example/test files)
+dapr-agents/dapr_agents/storage/graphstores/neo4j/client.py
+dapr-agents/quickstarts/02_llm_call_open_ai/openrouter_test.py
+dapr-agents/quickstarts/02_llm_call_open_ai/openrouter_updated.py
+dapr-agents/quickstarts/08-data-agent-mcp-chainlit/README.md
