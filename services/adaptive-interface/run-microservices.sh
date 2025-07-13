@@ -68,11 +68,11 @@ cleanup() {
     echo "🛑 Stopping services..."
     kill $BACKEND_PID 2>/dev/null
     kill $FRONTEND_PID 2>/dev/null
-    
+
     # Stop any remaining dapr processes
     pkill -f "dapr run.*compliance-agent-backend" 2>/dev/null
     pkill -f "dapr run.*adaptive-interface" 2>/dev/null
-    
+
     echo "✅ All services stopped"
     exit 0
 }

@@ -48,7 +48,7 @@ jobs:
         if [ -s changed_files.txt ]; then
           echo "Files to scan:"
           cat changed_files.txt
-          
+
           # Check each changed file
           while read -r file; do
             if [ -f "$file" ]; then

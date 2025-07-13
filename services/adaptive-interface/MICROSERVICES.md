@@ -5,7 +5,7 @@
 The Adaptive Compliance Interface now implements a proper **microservices architecture** with:
 
 - **Frontend Service** (Chainlit) - Port 9150
-- **Backend Service** (Dapr Agent) - Port 9160  
+- **Backend Service** (Dapr Agent) - Port 9160
 - **Dapr Service Mesh** - Handles communication between services
 
 ## 📁 Structure
@@ -44,7 +44,7 @@ The Adaptive Compliance Interface now implements a proper **microservices archit
 cd backend
 docker build -t compliance-agent-backend:latest .
 
-# Frontend  
+# Frontend
 cd ../frontend
 docker build -t adaptive-interface-frontend:latest .
 ```
@@ -93,11 +93,11 @@ http://localhost:9151/v1.0/invoke/compliance-agent-backend/method/query
 
 ## 🎯 Benefits
 
-✅ **Separation of Concerns**: UI and AI logic separated  
-✅ **Independent Scaling**: Scale frontend/backend independently  
-✅ **Technology Flexibility**: Different tech stacks per service  
-✅ **Fault Isolation**: Frontend stays up if backend fails  
-✅ **True Dapr Pattern**: Proper service-to-service communication  
+✅ **Separation of Concerns**: UI and AI logic separated
+✅ **Independent Scaling**: Scale frontend/backend independently
+✅ **Technology Flexibility**: Different tech stacks per service
+✅ **Fault Isolation**: Frontend stays up if backend fails
+✅ **True Dapr Pattern**: Proper service-to-service communication
 ✅ **Resource Optimization**: Dedicated resources per service
 
 ## 🔧 Port Configuration
@@ -110,7 +110,7 @@ http://localhost:9151/v1.0/invoke/compliance-agent-backend/method/query
 ## 📊 Monitoring
 
 - **Frontend Health**: `http://localhost:9150/healthz`
-- **Backend Health**: `http://localhost:9160/health`  
+- **Backend Health**: `http://localhost:9160/health`
 - **Dapr Dashboard**: `dapr dashboard`
 
 ## 🔒 Security

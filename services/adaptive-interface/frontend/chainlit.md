@@ -5,7 +5,7 @@ Welcome to your intelligent compliance assistant! This modern chat interface con
 ## 🎯 What I Can Help With
 
 - **📋 Regulatory Compliance** - GDPR, SOX, ISO 27001, HIPAA guidance
-- **🔍 Risk Assessment** - Identify and mitigate compliance risks  
+- **🔍 Risk Assessment** - Identify and mitigate compliance risks
 - **📄 Document Analysis** - Review policies and procedures
 - **💡 Strategic Planning** - Develop compliance roadmaps
 - **🎓 Training Support** - Compliance education and best practices
@@ -19,7 +19,7 @@ Frontend (Chainlit) ↔ Dapr Service Mesh ↔ Backend (AI Agent)
 ```
 
 - **Frontend**: Modern chat interface on port 9150
-- **Backend**: Dedicated AI agent service on port 9160  
+- **Backend**: Dedicated AI agent service on port 9160
 - **Dapr**: Service mesh handling communication and state
 
 ## 🚀 Ready to Start?

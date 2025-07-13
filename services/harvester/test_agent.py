@@ -43,7 +43,7 @@ async def startup_event():
     global research_agent
     try:
         logger.info("🚀 Starting DuckDuckGo Research Agent...")
-        
+
         # Create agent with MCP tools
         research_agent = DurableAgent(
             name="DuckDuckGoResearcher",
@@ -74,26 +74,26 @@ async def startup_event():
             agents_registry_key="agents-registry",
             tools=[]  # Will be loaded from MCP
         )
-        
+
         # Initialize MCP client for DuckDuckGo
         mcp_client = MCPClient()
-        
+
         logger.info("🌐 Connecting to MCP server...")
         await mcp_client.connect_streamable_http(
             server_name="duckduckgo",
             url=os.getenv("MCP_SERVER_URL", "http://138.3.218.137/ddg/mcp")
         )
-        
+
         # Load MCP tools
         mcp_tools = mcp_client.get_all_tools()
         research_agent.tools.extend(mcp_tools)
-        
+
         logger.info(f"✅ Loaded {len(mcp_tools)} MCP tools")
         tool_names = [tool.name for tool in mcp_tools]
         logger.info(f"📋 Available tools: {', '.join(tool_names)}")
-        
+
         logger.info("✅ DuckDuckGo Research Agent initialized successfully")
-        
+
     except Exception as e:
         logger.error(f"❌ Failed to initialize research agent: {e}")
         raise
@@ -113,39 +113,39 @@ async def research_query(request: QueryRequest):
     """Research a query using DuckDuckGo"""
     if not research_agent:
         raise HTTPException(status_code=503, detail="Research agent not initialized")
-    
+
     try:
         logger.info(f"🔍 Researching: {request.query}")
-        
+
         # Update memory session
         if research_agent.memory.session_id != request.session_id:
             research_agent.memory.session_id = request.session_id
-        
+
         # Enhanced prompt for better research
         research_prompt = f"""
         Please research the following topic using web search: {request.query}
-        
+
         Instructions:
         1. Use DuckDuckGo search to find current and relevant information
         2. Search for multiple aspects of the topic if it's complex
         3. Provide a comprehensive summary with key findings
         4. Include sources and context where possible
         5. Structure your response clearly with sections if appropriate
-        
+
         Topic to research: {request.query}
         """
-        
+
         # Run the research
         response = await research_agent.run(research_prompt)
-        
+
         # Extract response content
         response_content = response.get_content() if hasattr(response, 'get_content') else str(response)
-        
+
         # Save research results to state store
         await save_research_results(request.query, response_content, request.session_id)
-        
+
         logger.info(f"✅ Research completed for: {request.query[:50]}...")
-        
+
         return QueryResponse(
             response=response_content,
             session_id=request.session_id,
@@ -153,7 +153,7 @@ async def research_query(request: QueryRequest):
             timestamp=datetime.now().isoformat(),
             tools_used=[tool.name for tool in research_agent.tools]
         )
-        
+
     except Exception as e:
         logger.error(f"❌ Research failed: {e}")
         raise HTTPException(status_code=500, detail=f"Research failed: {str(e)}")
@@ -175,7 +175,7 @@ async def save_research_results(query: str, response: str, session_id: str):
                 "research_type": "web_search"
             }
         }
-        
+
         # Save using Dapr client
         with DaprClient() as dapr:
             key = f"research_results/query_{hash(query)}_{int(datetime.now().timestamp())}"
@@ -184,9 +184,9 @@ async def save_research_results(query: str, response: str, session_id: str):
                 key=key,
                 value=json.dumps(result_record)
             )
-            
+
             logger.info(f"💾 Saved research results with key: {key}")
-            
+
     except Exception as e:
         logger.error(f"⚠️ Error saving research results: {e}")
 
@@ -203,9 +203,9 @@ async def get_research_results(session_id: str):
 
 if __name__ == "__main__":
     import uvicorn
-    
+
     port = int(os.getenv("APP_PORT", "8000"))
     host = os.getenv("APP_HOST", "0.0.0.0")
-    
+
     logger.info(f"🌟 Starting DuckDuckGo Research Test on {host}:{port}")
     uvicorn.run(app, host=host, port=port, log_level="info")

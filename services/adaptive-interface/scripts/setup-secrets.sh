@@ -33,34 +33,34 @@ case $choice in
         ;;
     2)
         echo "☸️  Setting up Kubernetes secrets..."
-        
+
         # Check if kubectl is available
         if ! command -v kubectl &> /dev/null; then
             echo "❌ kubectl not found. Please install kubectl first."
             exit 1
         fi
-        
+
         # Create namespace if it doesn't exist
         kubectl create namespace compliance-sentinel --dry-run=client -o yaml | kubectl apply -f -
-        
+
         # Create secrets from file
         if [ -f "secrets/secrets.json" ]; then
             echo "Creating Kubernetes secrets..."
-            
+
             # Extract and create individual secrets
             OPENAI_KEY=$(jq -r '.openai.api_key' secrets/secrets.json)
             PG_HOST=$(jq -r '.database.pg_host' secrets/secrets.json)
             PG_PASSWORD=$(jq -r '.database.pg_password' secrets/secrets.json)
-            
+
             kubectl create secret generic openai-secret \
                 --from-literal=api-key="$OPENAI_KEY" \
                 -n compliance-sentinel --dry-run=client -o yaml | kubectl apply -f -
-                
+
             kubectl create secret generic postgres-secret \
                 --from-literal=host="$PG_HOST" \
                 --from-literal=password="$PG_PASSWORD" \
                 -n compliance-sentinel --dry-run=client -o yaml | kubectl apply -f -
-                
+
             echo "✅ Kubernetes secrets created"
         else
             echo "❌ secrets/secrets.json not found"

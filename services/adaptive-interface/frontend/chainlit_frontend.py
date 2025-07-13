@@ -20,18 +20,18 @@ BACKEND_DIRECT_URL = "http://localhost:9160"  # Fallback for local testing
 @cl.on_chat_start
 async def start():
     """Initialize the frontend when chat starts."""
-    
+
     # Test backend connectivity
     backend_available = await test_backend_connectivity()
-    
+
     if backend_available:
         welcome_msg = """
-🤖 **Adaptive Compliance Interface** 
+🤖 **Adaptive Compliance Interface**
 
 Welcome! I'm your AI compliance assistant powered by a dedicated Dapr Agent backend, ready to help with:
 
 📄 **Document Analysis** - Upload and analyze compliance documents
-🔍 **Regulatory Research** - Find relevant regulations and requirements  
+🔍 **Regulatory Research** - Find relevant regulations and requirements
 📋 **Strategic Planning** - Develop compliance strategies and action plans
 ❓ **Expert Guidance** - Get answers to compliance questions
 🎯 **Risk Assessment** - Identify and mitigate compliance risks
@@ -43,7 +43,7 @@ Welcome! I'm your AI compliance assistant powered by a dedicated Dapr Agent back
 """
     else:
         welcome_msg = """
-🤖 **Adaptive Compliance Interface** 
+🤖 **Adaptive Compliance Interface**
 
 ⚠️ **Backend Service Unavailable**
 
@@ -59,7 +59,7 @@ The compliance agent backend service is not responding. This could mean:
 
 Please start the backend service and refresh the page.
 """
-    
+
     await cl.Message(content=welcome_msg).send()
     logger.info("Frontend initialized")
 
@@ -74,7 +74,7 @@ async def test_backend_connectivity() -> bool:
                     return True
     except Exception as e:
         logger.warning(f"Dapr service invocation failed: {e}")
-    
+
     try:
         # Fallback to direct connection
         async with aiohttp.ClientSession() as session:
@@ -84,32 +84,32 @@ async def test_backend_connectivity() -> bool:
                     return True
     except Exception as e:
         logger.warning(f"Direct backend connection failed: {e}")
-    
+
     return False
 
 @cl.on_message
 async def main(message: cl.Message):
     """Handle incoming messages by calling the backend service."""
-    
+
     try:
         async with cl.Step(name="🔄 Backend Processing", type="tool") as step:
             step.output = "Sending query to compliance agent backend..."
-            
+
             # Prepare the request payload
             payload = {
                 "message": message.content,
                 "session_id": cl.user_session.get("session_id")
             }
-            
+
             # Try Dapr service invocation first
             response_data = await call_backend_service(payload)
-            
+
             if response_data:
                 step.output = "✅ Response received from backend"
-                
+
                 # Display agent availability status
                 agent_status = "🤖 AI Agent" if response_data.get("agent_available") else "📝 Basic Mode"
-                
+
                 # Send the response
                 full_response = f"{response_data['response']}\n\n---\n*{agent_status}*"
                 await cl.Message(content=full_response).send()
@@ -118,7 +118,7 @@ async def main(message: cl.Message):
                 await cl.Message(
                     content="❌ **Service Unavailable**\n\nThe compliance agent backend is not responding. Please ensure the backend service is running and try again."
                 ).send()
-                
+
     except Exception as e:
         logger.error(f"Error processing message: {e}")
         await cl.Message(
@@ -127,7 +127,7 @@ async def main(message: cl.Message):
 
 async def call_backend_service(payload: dict) -> Optional[dict]:
     """Call the backend service via Dapr or direct connection."""
-    
+
     # Try Dapr service invocation first
     try:
         async with aiohttp.ClientSession() as session:
@@ -143,7 +143,7 @@ async def call_backend_service(payload: dict) -> Optional[dict]:
                     logger.warning(f"Dapr service call failed with status: {response.status}")
     except Exception as e:
         logger.warning(f"Dapr service invocation failed: {e}")
-    
+
     # Fallback to direct connection
     try:
         async with aiohttp.ClientSession() as session:
@@ -160,7 +160,7 @@ async def call_backend_service(payload: dict) -> Optional[dict]:
                     logger.error(f"Direct backend call failed with status: {response.status}")
     except Exception as e:
         logger.error(f"Direct backend connection failed: {e}")
-    
+
     return None
 
 if __name__ == "__main__":

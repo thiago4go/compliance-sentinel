@@ -27,7 +27,7 @@ agent: Optional[object] = None
 async def start():
     """Initialize the adaptive compliance agent when chat starts."""
     global agent
-    
+
     try:
         if DAPR_AGENTS_AVAILABLE:
             # Create compliance agent with dapr-agents
@@ -43,14 +43,14 @@ async def start():
                 ],
                 tools=[],  # Start with basic tools
             )
-            
+
             welcome_msg = """
-🤖 **Adaptive Compliance Interface** 
+🤖 **Adaptive Compliance Interface**
 
 Welcome! I'm your AI compliance assistant powered by Dapr Agents, ready to help with:
 
 📄 **Document Analysis** - Upload and analyze compliance documents
-🔍 **Regulatory Research** - Find relevant regulations and requirements  
+🔍 **Regulatory Research** - Find relevant regulations and requirements
 📋 **Strategic Planning** - Develop compliance strategies and action plans
 ❓ **Expert Guidance** - Get answers to compliance questions
 🎯 **Risk Assessment** - Identify and mitigate compliance risks
@@ -64,12 +64,12 @@ Welcome! I'm your AI compliance assistant powered by Dapr Agents, ready to help 
             # Fallback mode without dapr-agents
             agent = None
             welcome_msg = """
-🤖 **Adaptive Compliance Interface** 
+🤖 **Adaptive Compliance Interface**
 
 Welcome! I'm your compliance assistant running in basic mode.
 
 📄 **Document Analysis** - Upload and discuss compliance documents
-🔍 **Regulatory Guidance** - Get general compliance advice  
+🔍 **Regulatory Guidance** - Get general compliance advice
 📋 **Best Practices** - Learn about compliance strategies
 ❓ **Q&A Support** - Ask compliance-related questions
 
@@ -91,19 +91,19 @@ Welcome! I'm your compliance assistant running in basic mode.
 async def main(message: cl.Message):
     """Handle incoming messages."""
     global agent
-    
+
     try:
         if DAPR_AGENTS_AVAILABLE and agent:
             # Use dapr-agents for intelligent response
             async with cl.Step(name="🧠 AI Analysis", type="tool") as step:
                 step.output = "Analyzing your compliance query with AI..."
-                
+
                 try:
                     response = await agent.run(message.content)
                     step.output = "✅ Analysis complete"
-                    
+
                     await cl.Message(content=response).send()
-                    
+
                 except Exception as e:
                     step.output = f"⚠️ AI processing error: {str(e)}"
                     # Fallback to basic response
@@ -111,7 +111,7 @@ async def main(message: cl.Message):
         else:
             # Basic fallback mode
             await handle_basic_response(message.content)
-            
+
     except Exception as e:
         logger.error(f"Error processing message: {e}")
         await cl.Message(
@@ -120,10 +120,10 @@ async def main(message: cl.Message):
 
 async def handle_basic_response(user_message: str):
     """Handle responses in basic mode without AI agents."""
-    
+
     # Simple keyword-based responses for common compliance topics
     user_msg_lower = user_message.lower()
-    
+
     if any(word in user_msg_lower for word in ['gdpr', 'privacy', 'data protection']):
         response = """
 📋 **Data Protection & GDPR Compliance**
@@ -138,7 +138,7 @@ Key areas to focus on:
 
 Would you like me to elaborate on any of these areas?
 """
-    
+
     elif any(word in user_msg_lower for word in ['sox', 'sarbanes', 'financial', 'audit']):
         response = """
 💼 **SOX & Financial Compliance**
@@ -153,7 +153,7 @@ Essential compliance elements:
 
 What specific aspect of financial compliance interests you?
 """
-    
+
     elif any(word in user_msg_lower for word in ['iso', '27001', 'security', 'information']):
         response = """
 🔒 **ISO 27001 & Information Security**
@@ -168,7 +168,7 @@ Core implementation areas:
 
 Which security domain would you like to explore further?
 """
-    
+
     elif any(word in user_msg_lower for word in ['help', 'start', 'how', 'what']):
         response = """
 🤝 **How I Can Help You**
@@ -196,7 +196,7 @@ I can assist with various compliance topics:
 
 Try asking about a specific regulation or compliance challenge!
 """
-    
+
     else:
         response = f"""
 📝 **Compliance Consultation**

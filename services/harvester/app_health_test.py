@@ -29,7 +29,7 @@ async def health_check(response: Response):
         # Set proper headers
         response.headers["Content-Type"] = "application/json"
         response.headers["Cache-Control"] = "no-cache"
-        
+
         health_data = {
             "status": "healthy",
             "timestamp": datetime.now().isoformat(),
@@ -37,10 +37,10 @@ async def health_check(response: Response):
             "app_id": os.getenv("DAPR_APP_ID", "harvester-agent"),
             "version": "1.0.0"
         }
-        
+
         logger.info(f"Health check requested - returning: {health_data}")
         return health_data
-        
+
     except Exception as e:
         logger.error(f"Health check failed: {e}")
         response.status_code = 500
@@ -56,7 +56,7 @@ async def health_check(response: Response):
 async def root():
     """Root endpoint"""
     return {
-        "message": "Compliance Sentinel Harvester Service", 
+        "message": "Compliance Sentinel Harvester Service",
         "status": "running",
         "app_id": os.getenv("DAPR_APP_ID", "harvester-agent"),
         "timestamp": datetime.now().isoformat()
@@ -75,12 +75,12 @@ async def dapr_config():
 
 if __name__ == "__main__":
     import uvicorn
-    
+
     port = int(os.getenv("APP_PORT", "8000"))
     host = os.getenv("APP_HOST", "0.0.0.0")
-    
+
     logger.info(f"🌟 Starting enhanced harvester service on {host}:{port}")
     logger.info(f"🔍 App ID: {os.getenv('DAPR_APP_ID', 'harvester-agent')}")
     logger.info(f"🏥 Health check endpoint: /health")
-    
+
     uvicorn.run(app, host=host, port=port, log_level="info")

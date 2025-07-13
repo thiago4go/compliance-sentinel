@@ -74,7 +74,7 @@ kubectl apply -f k8s/
 ### Ports
 
 - **9150**: Chainlit frontend
-- **9151**: Dapr HTTP API  
+- **9151**: Dapr HTTP API
 - **9152**: Dapr gRPC API
 
 ### Dapr Components

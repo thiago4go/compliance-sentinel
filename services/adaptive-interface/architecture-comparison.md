@@ -21,7 +21,7 @@
 │   (Port 9150)   │                     │   (Port 9160)   │
 └─────────────────┘                     └─────────────────┘
      ↕ Dapr HTTP                              ↕ OpenAI API
-     (Port 9151)                              
+     (Port 9151)
 ```
 
 ## Benefits of Microservices Approach

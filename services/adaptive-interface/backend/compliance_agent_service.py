@@ -41,18 +41,18 @@ class QueryResponse(BaseModel):
 async def get_secret(secret_name: str, key: str) -> Optional[str]:
     """Get secret from Dapr secret store."""
     cache_key = f"{secret_name}:{key}"
-    
+
     # Check cache first
     if cache_key in secrets_cache:
         return secrets_cache[cache_key]
-    
+
     try:
         # Try Dapr secret store first
         dapr_port = os.getenv("DAPR_HTTP_PORT", "3500")
         secret_store = os.getenv("SECRET_STORE", "local-secret-store")
-        
+
         url = f"http://localhost:{dapr_port}/v1.0/secrets/{secret_store}/{secret_name}"
-        
+
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as response:
                 if response.status == 200:
@@ -61,30 +61,30 @@ async def get_secret(secret_name: str, key: str) -> Optional[str]:
                     if value:
                         secrets_cache[cache_key] = value
                         return value
-                        
+
     except Exception as e:
         logger.warning(f"Failed to get secret from Dapr: {e}")
-    
+
     # Fallback to environment variable
     env_var = f"{secret_name.upper()}_{key.upper()}"
     value = os.getenv(env_var)
     if value:
         secrets_cache[cache_key] = value
         return value
-        
+
     # Final fallback to direct env var
     if secret_name == "openai" and key == "api_key":
         value = os.getenv("OPENAI_API_KEY")
         if value:
             secrets_cache[cache_key] = value
             return value
-    
+
     return None
 
 async def load_secrets():
     """Load secrets on startup."""
     logger.info("Loading secrets...")
-    
+
     # Load OpenAI credentials
     openai_key = await get_secret("openai", "api_key")
     if openai_key:
@@ -92,11 +92,11 @@ async def load_secrets():
         logger.info("✅ OpenAI API key loaded")
     else:
         logger.warning("⚠️ OpenAI API key not found")
-    
+
     # Load database credentials
     pg_host = await get_secret("database", "pg_host")
     pg_password = await get_secret("database", "pg_password")
-    
+
     if pg_host and pg_password:
         os.environ["PG_HOST"] = pg_host
         os.environ["PG_PASSWORD"] = pg_password
@@ -108,10 +108,10 @@ async def load_secrets():
 async def lifespan(app: FastAPI):
     """Initialize the compliance agent on startup."""
     global agent
-    
+
     # Load secrets first
     await load_secrets()
-    
+
     try:
         if DAPR_AGENTS_AVAILABLE:
             agent = Agent(
@@ -131,9 +131,9 @@ async def lifespan(app: FastAPI):
             logger.warning("Running without Dapr Agents")
     except Exception as e:
         logger.error(f"Error initializing agent: {e}")
-    
+
     yield
-    
+
     # Cleanup on shutdown
     logger.info("Shutting down compliance agent backend")
 
@@ -152,7 +152,7 @@ async def health_check():
 async def process_query(request: QueryRequest):
     """Process compliance queries using the Dapr Agent."""
     global agent
-    
+
     try:
         if DAPR_AGENTS_AVAILABLE and agent:
             # Use dapr-agents for intelligent response
@@ -170,16 +170,16 @@ async def process_query(request: QueryRequest):
                 agent_available=False,
                 session_id=request.session_id
             )
-            
+
     except Exception as e:
         logger.error(f"Error processing query: {e}")
         raise HTTPException(status_code=500, detail=f"Query processing failed: {str(e)}")
 
 async def handle_basic_response(user_message: str) -> str:
     """Handle responses in basic mode without AI agents."""
-    
+
     user_msg_lower = user_message.lower()
-    
+
     if any(word in user_msg_lower for word in ['gdpr', 'privacy', 'data protection']):
         return """📋 **Data Protection & GDPR Compliance**
 
@@ -192,7 +192,7 @@ Key areas to focus on:
 • **Impact Assessments** - Conduct DPIAs for high-risk processing
 
 Would you like me to elaborate on any of these areas?"""
-    
+
     elif any(word in user_msg_lower for word in ['sox', 'sarbanes', 'financial', 'audit']):
         return """💼 **SOX & Financial Compliance**
 
@@ -205,7 +205,7 @@ Essential compliance elements:
 • **IT General Controls** - Secure financial systems and data
 
 What specific aspect of financial compliance interests you?"""
-    
+
     elif any(word in user_msg_lower for word in ['iso', '27001', 'security', 'information']):
         return """🔒 **ISO 27001 & Information Security**
 
@@ -218,7 +218,7 @@ Core implementation areas:
 • **Employee Training** - Educate staff on security practices
 
 Which security domain would you like to explore further?"""
-    
+
     else:
         return f"""📝 **Compliance Consultation**
 
