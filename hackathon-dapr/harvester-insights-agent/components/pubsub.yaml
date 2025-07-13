@@ -1,0 +1,18 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: messagepubsub
+spec:
+  type: pubsub.redis
+  version: v1
+  metadata:
+  - name: redisHost
+    value: "redis-dev:6379"  # Development: redis-dev:6379, Production: shared-redis:6379
+  - name: redisPassword
+    value: ""
+  - name: enableTLS
+    value: false
+scopes:
+- harvester-insights-agent
+- workflow-agent
+- adaptive-interface-agent

@@ -1,0 +1,82 @@
+version: '3.8'
+
+# This is for LOCAL DEVELOPMENT ONLY
+# In production, Redis and PostgreSQL are shared across all agents
+
+services:
+  # Local Redis for development (in production, this is shared)
+  redis-dev:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_dev_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Harvester Insights Agent (Development)
+  harvester-agent-dev:
+    build: .
+    ports:
+      - "9180:9180"
+    environment:
+      # Application configuration
+      - APP_PORT=9180
+      - APP_HOST=0.0.0.0
+      - LOG_LEVEL=DEBUG
+      
+      # OpenRouter LLM configuration
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+      - OPENROUTER_MODEL=openai/gpt-4o
+      
+      # MCP Server configuration (external shared MCP server)
+      - MCP_SERVER_URL=${MCP_SERVER_URL:-http://host.docker.internal:8080/mcp}
+      - MCP_API_TOKEN=${MCP_API_TOKEN}
+      
+      # Dapr configuration (local development)
+      - DAPR_HTTP_ENDPOINT=http://localhost:3500
+      - DAPR_GRPC_ENDPOINT=http://localhost:50001
+      
+    depends_on:
+      redis-dev:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9180/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    volumes:
+      - ./logs:/app/logs
+      - ./.env:/app/.env
+
+  # Harvester Agent Dapr Sidecar (Development)
+  harvester-dapr-dev:
+    image: "daprio/daprd:1.12.0"
+    command: [
+      "./daprd",
+      "-app-id", "harvester-insights-agent",
+      "-app-port", "9180",
+      "-dapr-http-port", "3500",
+      "-dapr-grpc-port", "50001",
+      "-components-path", "/components",
+      "-config", "/config/config.yaml"
+    ]
+    volumes:
+      - "./components:/components"
+      - "./config:/config"
+    depends_on:
+      - harvester-agent-dev
+      - redis-dev
+    network_mode: "service:harvester-agent-dev"
+
+volumes:
+  redis_dev_data:
+
+networks:
+  default:
+    name: compliance-sentinel-dev-network
