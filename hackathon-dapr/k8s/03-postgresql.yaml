@@ -1,0 +1,181 @@
+---
+# PostgreSQL Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgresql
+  namespace: compliance-sentinel
+  labels:
+    app: postgresql
+    component: infrastructure
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgresql
+  template:
+    metadata:
+      labels:
+        app: postgresql
+    spec:
+      containers:
+      - name: postgresql
+        image: postgres:15-alpine
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          valueFrom:
+            secretKeyRef:
+              name: database-secret
+              key: pg-database
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: database-secret
+              key: pg-user
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: database-secret
+              key: pg-password
+        - name: POSTGRES_INITDB_ARGS
+          value: "--encoding=UTF-8"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - postgres
+            - -d
+            - compliance_sentinel
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - postgres
+            - -d
+            - compliance_sentinel
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+        - name: init-scripts
+          mountPath: /docker-entrypoint-initdb.d
+      volumes:
+      - name: postgres-data
+        emptyDir: {}
+      - name: init-scripts
+        configMap:
+          name: postgres-init-scripts
+
+---
+# PostgreSQL Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgresql-service
+  namespace: compliance-sentinel
+  labels:
+    app: postgresql
+spec:
+  selector:
+    app: postgresql
+  ports:
+  - port: 5432
+    targetPort: 5432
+    protocol: TCP
+  type: ClusterIP
+
+---
+# PostgreSQL Initialization Scripts ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init-scripts
+  namespace: compliance-sentinel
+data:
+  init.sql: |
+    -- Compliance Sentinel Database Initialization
+    -- This script sets up the core tables for the compliance management system
+
+    -- Create extensions
+    CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+    CREATE EXTENSION IF NOT EXISTS "pg_trgm";
+
+    -- Companies table
+    CREATE TABLE companies (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        name VARCHAR(255) NOT NULL,
+        industry VARCHAR(100),
+        size VARCHAR(50), -- SMB, Enterprise, etc.
+        country VARCHAR(100),
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    );
+
+    -- Compliance frameworks
+    CREATE TABLE compliance_frameworks (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        name VARCHAR(100) NOT NULL UNIQUE,
+        description TEXT,
+        version VARCHAR(50),
+        effective_date DATE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    );
+
+    -- Insert default frameworks
+    INSERT INTO compliance_frameworks (name, description, version) VALUES
+    ('GDPR', 'General Data Protection Regulation', '2018'),
+    ('ISO 27001', 'Information Security Management Systems', '2022'),
+    ('SOX', 'Sarbanes-Oxley Act', '2002'),
+    ('HIPAA', 'Health Insurance Portability and Accountability Act', '1996'),
+    ('PCI DSS', 'Payment Card Industry Data Security Standard', '4.0');
+
+    -- Compliance assessments
+    CREATE TABLE compliance_assessments (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        company_id UUID REFERENCES companies(id),
+        framework_id UUID REFERENCES compliance_frameworks(id),
+        status VARCHAR(50) DEFAULT 'in_progress',
+        score DECIMAL(5,2),
+        risk_level VARCHAR(20),
+        assessment_data JSONB,
+        recommendations TEXT[],
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        completed_at TIMESTAMP WITH TIME ZONE,
+        created_by VARCHAR(100)
+    );
+
+    -- Agent workflow logs
+    CREATE TABLE agent_workflow_logs (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        workflow_id VARCHAR(100) NOT NULL,
+        agent_name VARCHAR(100) NOT NULL,
+        activity_name VARCHAR(100),
+        status VARCHAR(50),
+        input_data JSONB,
+        output_data JSONB,
+        error_message TEXT,
+        execution_time_ms INTEGER,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    );
+
+    -- Sample data for demo
+    INSERT INTO companies (name, industry, size, country) VALUES
+    ('TechStart Inc.', 'Technology', 'SMB', 'United States'),
+    ('HealthCare Solutions', 'Healthcare', 'SMB', 'Canada'),
+    ('FinanceFirst Ltd.', 'Financial Services', 'SMB', 'United Kingdom');
+
+    COMMIT;

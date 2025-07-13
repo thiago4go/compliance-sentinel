@@ -1,0 +1,129 @@
+version: '3.8'
+
+services:
+  # Redis - Used for Dapr State Store and Pub/Sub
+  redis:
+    image: redis:7-alpine
+    container_name: compliance-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - compliance-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # PostgreSQL - Main database for compliance data
+  postgres:
+    image: postgres:15-alpine
+    container_name: compliance-postgres
+    environment:
+      POSTGRES_DB: compliance_sentinel
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infrastructure/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - compliance-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d compliance_sentinel"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Adaptive Interface Agent Backend (Optional containerized version)
+  adaptive-interface-backend:
+    build:
+      context: ./adaptive-interface/backend
+      dockerfile: Dockerfile
+    container_name: compliance-adaptive-backend
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o-mini}
+      - DAPR_HTTP_PORT=3500
+      - REDIS_HOST=redis
+      - PG_HOST=postgres
+      - PG_PASSWORD=postgres123
+    ports:
+      - "9160:9160"
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - compliance-network
+    profiles:
+      - containerized
+
+  # Workflow Agent (Optional containerized version)
+  workflow-agent:
+    build:
+      context: ./workflow-agent
+      dockerfile: Dockerfile
+    container_name: compliance-workflow-agent
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DAPR_HTTP_PORT=3500
+      - REDIS_HOST=redis
+      - PG_HOST=postgres
+      - PG_PASSWORD=postgres123
+    ports:
+      - "9170:9170"
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - compliance-network
+    profiles:
+      - containerized
+
+  # Harvester Insights Agent (Optional containerized version)
+  harvester-agent:
+    build:
+      context: ./harvester-insights-agent
+      dockerfile: Dockerfile
+    container_name: compliance-harvester-agent
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DAPR_HTTP_PORT=3500
+      - REDIS_HOST=redis
+      - PG_HOST=postgres
+      - PG_PASSWORD=postgres123
+    ports:
+      - "9180:9180"
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - compliance-network
+    profiles:
+      - containerized
+
+volumes:
+  redis_data:
+    driver: local
+  postgres_data:
+    driver: local
+
+networks:
+  compliance-network:
+    driver: bridge
+
+# Usage:
+# Basic infrastructure only: docker-compose up -d redis postgres
+# Full containerized setup: docker-compose --profile containerized up -d
+# Development mode: Use ./scripts/start-all.sh for Dapr-enabled local development

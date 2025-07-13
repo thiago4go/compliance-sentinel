@@ -1,0 +1,104 @@
+---
+# Redis State Store Component
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: statestore
+  namespace: compliance-sentinel
+spec:
+  type: state.redis
+  version: v1
+  metadata:
+  - name: redisHost
+    value: redis-service:6379
+  - name: redisPassword
+    secretKeyRef:
+      name: redis-secret
+      key: redis-password
+  - name: actorStateStore
+    value: "true"
+  - name: keyPrefix
+    value: "compliance-sentinel"
+scopes:
+- adaptive-interface-backend
+- workflow-agent
+- harvester-insights-agent
+
+---
+# Redis Pub/Sub Component
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: messagebus
+  namespace: compliance-sentinel
+spec:
+  type: pubsub.redis
+  version: v1
+  metadata:
+  - name: redisHost
+    value: redis-service:6379
+  - name: redisPassword
+    secretKeyRef:
+      name: redis-secret
+      key: redis-password
+  - name: consumerID
+    value: "compliance-sentinel"
+scopes:
+- adaptive-interface-backend
+- workflow-agent
+- harvester-insights-agent
+
+---
+# Kubernetes Secret Store Component
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: kubernetes-secret-store
+  namespace: compliance-sentinel
+spec:
+  type: secretstores.kubernetes
+  version: v1
+  metadata:
+  - name: vaultName
+    value: "compliance-sentinel"
+scopes:
+- adaptive-interface-backend
+- workflow-agent
+- harvester-insights-agent
+
+---
+# PostgreSQL Binding Component (Optional)
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: postgres-binding
+  namespace: compliance-sentinel
+spec:
+  type: bindings.postgresql
+  version: v1
+  metadata:
+  - name: url
+    secretKeyRef:
+      name: database-secret
+      key: connection-string
+scopes:
+- harvester-insights-agent
+
+---
+# Dapr Configuration
+apiVersion: dapr.io/v1alpha1
+kind: Configuration
+metadata:
+  name: dapr-config
+  namespace: compliance-sentinel
+spec:
+  tracing:
+    samplingRate: "1"
+    zipkin:
+      endpointAddress: "http://zipkin:9411/api/v2/spans"
+  metric:
+    enabled: true
+  secrets:
+    scopes:
+    - storeName: kubernetes-secret-store
+      defaultAccess: allow
