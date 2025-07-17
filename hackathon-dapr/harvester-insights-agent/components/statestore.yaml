@@ -7,13 +7,12 @@ spec:
   version: v1
   metadata:
   - name: redisHost
-    value: "redis-dev:6379"  # Development: redis-dev:6379, Production: shared-redis:6379
+    value: "localhost:6379"  # Use localhost for local development
   - name: redisPassword
     value: ""
   - name: enableTLS
     value: false
-  - name: actorStateStore
-    value: "true"
+  # Removed actorStateStore since agentstatestore is already the actor store
 scopes:
 - harvester-insights-agent
 - workflow-agent

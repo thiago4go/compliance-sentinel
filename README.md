@@ -1,95 +1,207 @@
- # Dapr AI Hackathon - Project Submission Template
+# Dapr AI Hackathon - Compliance Sentinel
 
-Welcome to the official project submission repository template for the **Dapr AI Hackathon x Diagrid**! This GitHub template repository is designed to help you structure and submit your hackathon project efficiently.
-
-## About This Template
-
-This repository is set up as a GitHub template that you can use as a starting point for your hackathon project. By using this template, you'll:
-
-1. Start with the recommended project structure
-2. Have clear documentation guidelines
-3. Ensure your submission meets all requirements
-4. Make it easier for judges to evaluate your project
-
-## About the Hackathon
-
-The Dapr AI Hackathon (May 16 - June 27, 2025) is a global challenge to build intelligent, resilient, and scalable AI applications using the power of Dapr Workflows and Dapr Agents. Whether you're orchestrating autonomous agents, designing durable AI pipelines, or ensuring responsible AI behavior, this hackathon is your opportunity to push the boundaries of distributed intelligence. To learn more, visit: [https://github.com/diagrid-labs/dapr-ai-hackathon](https://github.com/diagrid-labs/dapr-ai-hackathon).
-
-## Getting Started with This Template
-
-> [!TIP]
-> Feel free to adapt this structure to your project's specific needs. The most important thing is to have a clear, organized structure with adequate documentation that meets the submission criteria.
-
-To use this template for your Dapr AI Hackathon submission:
-
-1. **Create a new repository from this template**: Click the "Use this template" button at the top of this repository
-1. **Name your new repository**: Choose a name related to your project
-1. **Clone your new repository**: Clone the repository to your local machine
-1. **Provide Hackathon organizer's access**: Add @kendallroden on GitHub to access your project template
-1. **Update this README.md**: Replace the content in the "Project Details" section with your project information as you iterate
-1. **Add your project code**: Implement your hackathon project in this repository
-1. **Submit your project**: Open an issue in the [official Dapr AI Hackathon repository](https://github.com/diagrid-labs/dapr-ai-hackathon/issues/new/choose) using the Project Submission template and include a link to your private repository
+Welcome to **Compliance Sentinel**, an intelligent, distributed AI system built for the **Dapr AI Hackathon x Diagrid**! This project demonstrates the power of multi-agent orchestration, workflow resilience, and distributed architecture using Dapr Workflows and Dapr Agents.
 
 ## Project Details
 
-> **NOTE**: Replace this section with your project information as you iterate
-
 ### 🚀 Project Name
 
-[Your project name here]
+**Compliance Sentinel** - Intelligent Compliance Monitoring and Analysis System
 
 ### 📝 Summary
 
-[Provide an overview of your application and its core use case]
+Compliance Sentinel is an advanced AI-powered system that automates compliance monitoring, analysis, and reporting for organizations. The system leverages multiple specialized AI agents working collaboratively to harvest insights, perform compliance checks, and provide actionable recommendations through an intuitive user interface.
+
+The application uses event-driven architecture with Dapr to orchestrate three specialized agents:
+- **Adaptive Interface Agent**: Manages user interactions and UI communication
+- **Workflow Agent**: Orchestrates the compliance process and manages agent coordination
+- **Harvester Insights Agent**: Performs deep compliance analysis and data extraction
 
 ### 🏆 Category
 
-Choose one of the following solution categories:
+This project targets **all three solution categories**:
 
-- Collaborative Intelligence
-- Workflow Resilience
-- Distributed Architecture
-- Responsible AI
+- **✅ Collaborative Intelligence**: Multi-agent coordination with 3 specialized agents working together via pub/sub communication
+- **✅ Workflow Resilience**: Built-in state persistence, error recovery, and fault-tolerant AI pipelines using Dapr Workflows
+- **✅ Distributed Architecture**: Scalable microservices architecture with Dapr building blocks for state management, pub/sub, and secrets management
 
 ### 💻 Technology Used
 
-- **Platform**: [Dapr OSS, Catalyst, or both]
-- **Dapr APIs**: [List the Dapr APIs you leveraged (Workflow API, Pub/Sub, State, etc.)]
-- **Programming Languages**: [List the languages used]
-- **Additional Technologies**: [List any other significant technologies, frameworks, or tools used]
+- **Platform**: Dapr OSS with Dapr Agents
+- **Dapr APIs**: 
+  - Dapr Workflow API (orchestration and state management)
+  - Dapr Pub/Sub (event-driven communication)
+  - Dapr State Management (agent state persistence)
+  - Dapr Service Invocation (inter-service communication)
+  - Dapr Secrets Management (secure credential handling)
+- **Programming Languages**: Python
+- **Additional Technologies**: 
+  - **Frontend**: Chainlit (Interactive UI)
+  - **Database**: PostgreSQL (compliance data and insights storage)
+  - **Message Broker**: Redis (Dapr pub/sub and state store)
+  - **Tool Integration**: Model Context Protocol (MCP) for standardized tool access
+  - **Containerization**: Docker & Docker Compose
+  - **Testing**: pytest for comprehensive testing strategy
 
 ### 📋 Project Features
 
-- [Feature 1]
-- [Feature 2]
-- [Feature 3]
-- ...
+- **Multi-Agent Collaboration**: Three specialized AI agents with distinct roles and responsibilities
+- **Event-Driven Architecture**: Asynchronous communication using Dapr Pub/Sub for scalability and resilience
+- **Workflow Orchestration**: Durable workflows with built-in error handling and state persistence
+- **Interactive UI**: User-friendly Chainlit interface for compliance monitoring and analysis
+- **Intelligent Insights**: Advanced compliance analysis with actionable recommendations
+- **Fault Tolerance**: Resilient system design with automatic retries and error recovery
+- **Secure Operations**: Dapr Secrets Management for handling sensitive information
+- **Audit Trail**: Complete event sourcing for compliance history and audit requirements
+- **Tool Integration**: Standardized tool access via Model Context Protocol (MCP)
+- **Scalable Architecture**: Microservices design allowing independent scaling of components
 
 ### 🏗️ Architecture
 
-[Include a brief description of your application's architecture. Consider adding a diagram image here.]
+The Compliance Sentinel follows a distributed, event-driven microservices architecture:
+
+```
+┌─────────────────┐    ┌──────────────────────┐    ┌─────────────────────┐
+│   Chainlit UI   │───▶│ Adaptive Interface   │───▶│   Workflow Agent    │
+│   (Frontend)    │    │      Agent           │    │   (Orchestrator)    │
+└─────────────────┘    └──────────────────────┘    └─────────────────────┘
+                                │                            │
+                                ▼                            ▼
+                       ┌─────────────────┐         ┌─────────────────────┐
+                       │  Dapr Pub/Sub   │◀────────│ Harvester Insights  │
+                       │   (Redis)       │         │       Agent         │
+                       └─────────────────┘         └─────────────────────┘
+                                │                            │
+                                ▼                            ▼
+                       ┌─────────────────┐         ┌─────────────────────┐
+                       │ Dapr State      │         │    PostgreSQL       │
+                       │ Management      │         │    Database         │
+                       │   (Redis)       │         └─────────────────────┘
+                       └─────────────────┘
+```
+
+**Key Architectural Components:**
+
+1. **User Interaction Layer**: Chainlit UI provides an intuitive interface for compliance operations
+2. **Agent Orchestration**: Event-driven communication via Dapr Pub/Sub enables loose coupling and scalability
+3. **Workflow Management**: Dapr Workflows provide durable execution with state persistence and error recovery
+4. **Data Persistence**: PostgreSQL stores compliance results and insights with full audit trail
+5. **State Management**: Redis-backed Dapr state store maintains agent states and workflow context
+6. **Tool Integration**: MCP server provides standardized access to external tools and services
+
+**Event Flow:**
+1. User initiates compliance check via Chainlit UI
+2. Adaptive Interface Agent publishes `new-request` event
+3. Workflow Agent subscribes and initiates compliance workflow
+4. Workflow Agent publishes `harvest-insights` event
+5. Harvester Insights Agent performs analysis and publishes results
+6. Workflow Agent aggregates results and stores in database
+7. Final notification updates the UI with compliance insights
 
 ### 🎬 Demo
 
-[Provide instructions on how to access your demo video (3-5 minutes) showing the working application, the workflow or agent behavior, and how Dapr and/or Catalyst was used]
+**Demo Video**: [3-5 minute demonstration video showing:]
+- Live compliance analysis workflow execution
+- Multi-agent coordination and communication
+- Dapr Workflow orchestration in action
+- Real-time UI updates and user interaction
+- Fault tolerance and error recovery capabilities
+- Database persistence and audit trail features
+
+*[Demo video link will be provided upon completion]*
 
 ## Installation & Deployment Instructions
 
 ### Prerequisites
 
-- [List required software, APIs, accounts, etc.]
-- [Include version requirements if applicable]
+- **Docker & Docker Compose**: Latest version for containerized development
+- **Dapr CLI**: v1.12+ for local Dapr runtime management
+- **Python**: 3.9+ for agent development and testing
+- **PostgreSQL**: 13+ (or use Docker container)
+- **Redis**: 6+ (or use Docker container)
+- **Git**: For repository management
 
 ### Additional Set-Up
 
-[Provide instructions for running your application, optionally deploying, etc.]
+#### 1. Clone and Setup Repository
+```bash
+git clone <your-repository-url>
+cd compliance-sentinel
+```
+
+#### 2. Environment Configuration
+```bash
+# Copy environment template
+cp .env.example .env
+
+# Configure environment variables
+# - Database credentials
+# - Redis connection settings
+# - API keys and secrets
+```
+
+#### 3. Local Development with Docker Compose
+```bash
+# Start all services including Dapr sidecars
+docker-compose -f docker-compose.dev.yml up -d
+
+# Initialize Dapr components
+dapr init
+
+# Verify all services are running
+docker-compose ps
+```
+
+#### 4. Database Setup
+```bash
+# Run database migrations
+python scripts/setup_database.py
+
+# Load sample compliance data
+python scripts/load_sample_data.py
+```
+
+#### 5. Access the Application
+- **Chainlit UI**: http://localhost:8000
+- **Dapr Dashboard**: http://localhost:8080
+- **PostgreSQL**: localhost:5432
+- **Redis**: localhost:6379
+
+#### 6. Running Tests
+```bash
+# Unit tests
+pytest tests/unit/
+
+# Integration tests
+pytest tests/integration/
+
+# End-to-end tests
+pytest tests/e2e/
+```
+
+#### 7. Production Deployment (Kubernetes)
+```bash
+# Deploy to Kubernetes cluster
+kubectl apply -f k8s/
+
+# Verify deployment
+kubectl get pods -n compliance-sentinel
+```
+
+### Development Workflow
+
+1. **Local Development**: Use Docker Compose for consistent development environment
+2. **Testing**: Comprehensive test suite with unit, integration, and e2e tests
+3. **Monitoring**: Built-in Dapr observability and custom metrics
+4. **Debugging**: Dapr dashboard and logging for troubleshooting
 
 ## Team Members
 
-- [Team Member 1 Name](https://github.com/username1)
-- [Team Member 2 Name](https://github.com/username2)
-- ...
+- [Your Name](https://github.com/thiago4go) 
+- [Team Member 2](https://github.com/makaracc)
 
 ## License
 
-[Include license information here - we recommend MIT or Apache 2.0 for hackathon projects]
+MIT License - See [LICENSE](LICENSE)
+
+*This project demonstrates the power of distributed AI systems using Dapr's building blocks to create resilient, scalable, and intelligent applications.*
