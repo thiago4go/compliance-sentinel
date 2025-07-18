@@ -7,7 +7,7 @@ spec:
   version: v1
   metadata:
   - name: redisHost
-    value: "redis-dev:6379"  # Development: redis-dev:6379, Production: shared-redis:6379
+    value: "compliance-redis:6379"  # Use compliance-redis service
   - name: redisPassword
     value: ""
   - name: enableTLS
@@ -15,5 +15,5 @@ spec:
   - name: actorStateStore
     value: "true"
 scopes:
-- harvester-insights-agent
+- harvester-agent
 - workflow-agent

@@ -7,15 +7,13 @@ spec:
   version: v1
   metadata:
   - name: redisHost
-    value: redis:6379
+    value: "localhost:6379"
   - name: redisPassword
     value: ""
   - name: enableTLS
     value: false
   - name: keyPrefix
     value: "agent:"
-  - name: actorStateStore
-    value: "true"
 scopes:
-- harvester-insights-agent
+- harvester-agent
 - workflow-agent

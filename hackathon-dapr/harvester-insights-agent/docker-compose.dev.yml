@@ -4,21 +4,6 @@ version: '3.8'
 # In production, Redis and PostgreSQL are shared across all agents
 
 services:
-  # Local Redis for development (in production, this is shared)
-  redis-dev:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
-    command: redis-server --appendonly yes
-    volumes:
-      - redis_dev_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  # Harvester Insights Agent (Development)
   harvester-agent-dev:
     build: .
     ports:
@@ -35,7 +20,7 @@ services:
       - OPENROUTER_MODEL=openai/gpt-4o
       
       # MCP Server configuration (external shared MCP server)
-      - MCP_SERVER_URL=${MCP_SERVER_URL:-http://host.docker.internal:8080/mcp}
+      - MCP_SERVER_URL=${MCP_SERVER_URL:-http://host.docker.internal:8081/mcp}
       - MCP_API_TOKEN=${MCP_API_TOKEN}
       
       # Dapr configuration (local development)
@@ -43,7 +28,8 @@ services:
       - DAPR_GRPC_ENDPOINT=http://localhost:50001
       
     depends_on:
-      redis-dev:
+      # Connect to the Redis from the main docker-compose.yml
+      compliance-redis:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9180/health"]
@@ -53,6 +39,8 @@ services:
     volumes:
       - ./logs:/app/logs
       - ./.env:/app/.env
+    networks:
+      - compliance-network # Connect to the main network
 
   # Harvester Agent Dapr Sidecar (Development)
   harvester-dapr-dev:
@@ -71,12 +59,9 @@ services:
       - "./config:/config"
     depends_on:
       - harvester-agent-dev
-      - redis-dev
-    network_mode: "service:harvester-agent-dev"
-
-volumes:
-  redis_dev_data:
+    networks:
+      - compliance-network # Connect to the main network
 
 networks:
-  default:
-    name: compliance-sentinel-dev-network
+  compliance-network:
+    external: true

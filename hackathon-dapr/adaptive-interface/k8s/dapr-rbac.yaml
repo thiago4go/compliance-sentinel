@@ -1,0 +1,23 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: dapr-config-reader
+  namespace: default
+rules:
+- apiGroups: ["dapr.io"]
+  resources: ["configurations", "components", "subscriptions"]
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: dapr-config-reader-binding
+  namespace: default
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: default
+roleRef:
+  kind: Role
+  name: dapr-config-reader
+  apiGroup: rbac.authorization.k8s.io

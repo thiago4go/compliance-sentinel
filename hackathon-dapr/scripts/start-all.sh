@@ -53,7 +53,7 @@ echo -e "${GREEN}✅ Prerequisites check passed${NC}"
 
 # Start infrastructure services
 echo -e "${BLUE}🏗️  Starting infrastructure services...${NC}"
-docker-compose up -d redis postgres
+cd hackathon-dapr && docker-compose -f docker-compose.yml up -d redis postgres
 
 # Wait for services to be ready
 echo -e "${BLUE}⏳ Waiting for infrastructure services to be ready...${NC}"
@@ -137,7 +137,7 @@ start_dapr_service \
     "3501" \
     "50001" \
     "./adaptive-interface/backend" \
-    "python compliance_agent_service.py"
+    "python main.py"
 
 # Start Chainlit Frontend
 echo -e "${BLUE}🚀 Starting Chainlit Frontend...${NC}"

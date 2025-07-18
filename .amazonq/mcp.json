@@ -41,7 +41,17 @@
        "command": "npx",
       "args": ["-y", "mcp-remote", "https://mcp.deepwiki.com/mcp"],
       "timeout": 500000
+    },
+        "dbhub-postgres-npx": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@bytebase/dbhub",
+        "--transport",
+        "stdio",
+        "--dsn",
+        "postgresql://138.3.218.137:30432/compliance_sentinel?user=app_user&password=tothewin2025"
+      ]
     }
-
   }
 }

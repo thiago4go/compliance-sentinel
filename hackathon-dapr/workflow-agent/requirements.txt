@@ -1,9 +1,2 @@
-fastapi>=0.104.0
-uvicorn[standard]>=0.24.0
-pydantic>=2.5.0
-dapr>=1.12.0
-dapr-ext-workflow>=1.12.0
-dapr-agents>=0.2.0
-aiohttp>=3.9.0
-asyncio-mqtt>=0.13.0
-python-multipart>=0.0.6
+dapr
+dapr-ext-workflow

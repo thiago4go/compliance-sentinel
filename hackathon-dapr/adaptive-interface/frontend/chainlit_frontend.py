@@ -14,8 +14,8 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Backend service configuration
-BACKEND_SERVICE_URL = "http://localhost:9161/v1.0/invoke/compliance-agent-backend/method"
-BACKEND_DIRECT_URL = "http://localhost:9160"  # Fallback for local testing
+BACKEND_SERVICE_URL = "http://localhost:3502/v1.0/invoke/adaptive-interface-agent/method"
+BACKEND_DIRECT_URL = "http://10.0.0.209:9160"  # Fallback for local testing
 
 @cl.on_chat_start
 async def start():

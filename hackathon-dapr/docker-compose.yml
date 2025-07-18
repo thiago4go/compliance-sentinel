@@ -1,6 +1,31 @@
-version: '3.8'
+
+
+networks:
+  compliance-network:
+    driver: bridge
+
+volumes:
+  redis_data:
+    driver: local
+  postgres_data:
+    driver: local
 
 services:
+  # Dapr Placement Service - Required for Workflows and Actors
+  placement:
+    image: "daprio/dapr:1.12.0"
+    container_name: compliance-placement
+    command: ["./placement", "-port", "50005"]
+    ports:
+      - "50005:50005"
+    networks:
+      - compliance-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:50005/healthz"]
+      interval: 5s
+      timeout: 10s
+      retries: 3
+
   # Redis - Used for Dapr State Store and Pub/Sub
   redis:
     image: redis:7-alpine
@@ -40,90 +65,120 @@ services:
       timeout: 5s
       retries: 5
 
-  # Adaptive Interface Agent Backend (Optional containerized version)
-  adaptive-interface-backend:
+  # Adaptive Interface Agent (Chainlit UI)
+  adaptive-interface:
     build:
       context: ./adaptive-interface/backend
       dockerfile: Dockerfile
-    container_name: compliance-adaptive-backend
-    environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o-mini}
-      - DAPR_HTTP_PORT=3500
-      - REDIS_HOST=redis
-      - PG_HOST=postgres
-      - PG_PASSWORD=postgres123
-    ports:
-      - "9160:9160"
-    depends_on:
-      redis:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
+    container_name: compliance-adaptive-interface
+    
     networks:
       - compliance-network
-    profiles:
-      - containerized
+    restart: on-failure
+    environment:
+      - DAPR_HTTP_PORT=3501
+      - DAPR_GRPC_PORT=50001
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
 
-  # Workflow Agent (Optional containerized version)
+  adaptive-interface-daprd:
+    image: "daprio/daprd:1.12.0"
+    container_name: compliance-adaptive-interface-daprd
+    command:
+      - "./daprd"
+      - "-app-id"
+      - "adaptive-interface"
+      - "-app-port"
+      - "9160"
+      - "-dapr-http-port"
+      - "3501"
+      - "-dapr-grpc-port"
+      - "50001"
+      - "-placement-host-address"
+      - "placement:50005"
+      - "-resources-path"
+      - "/components"
+    ports:
+      - "9160:9160" # Expose Chainlit UI port
+    volumes:
+      - "./infrastructure/dapr-components/:/components"
+    depends_on:
+      - adaptive-interface
+    network_mode: "service:adaptive-interface"
+    restart: on-failure
+
+  # Workflow Agent
   workflow-agent:
     build:
       context: ./workflow-agent
       dockerfile: Dockerfile
     container_name: compliance-workflow-agent
-    environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - DAPR_HTTP_PORT=3500
-      - REDIS_HOST=redis
-      - PG_HOST=postgres
-      - PG_PASSWORD=postgres123
-    ports:
-      - "9170:9170"
-    depends_on:
-      redis:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
+    
     networks:
       - compliance-network
-    profiles:
-      - containerized
+    restart: on-failure
+    environment:
+      - DAPR_HTTP_PORT=3502
+      - DAPR_GRPC_PORT=50002
 
-  # Harvester Insights Agent (Optional containerized version)
+  workflow-agent-daprd:
+    image: "daprio/daprd:1.12.0"
+    container_name: compliance-workflow-agent-daprd
+    command:
+      - "./daprd"
+      - "-app-id"
+      - "workflow-agent"
+      - "-app-port"
+      - "9170"
+      - "-dapr-http-port"
+      - "3502"
+      - "-dapr-grpc-port"
+      - "50002"
+      - "-placement-host-address"
+      - "placement:50005"
+      - "-resources-path"
+      - "/components"
+    volumes:
+      - "./infrastructure/dapr-components/:/components"
+    depends_on:
+      - workflow-agent
+    network_mode: "service:workflow-agent"
+    restart: on-failure
+
+  # Harvester Insights Agent
   harvester-agent:
     build:
       context: ./harvester-insights-agent
       dockerfile: Dockerfile
     container_name: compliance-harvester-agent
-    environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - DAPR_HTTP_PORT=3500
-      - REDIS_HOST=redis
-      - PG_HOST=postgres
-      - PG_PASSWORD=postgres123
-    ports:
-      - "9180:9180"
-    depends_on:
-      redis:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
+    
     networks:
       - compliance-network
-    profiles:
-      - containerized
+    restart: on-failure
+    environment:
+      - DAPR_HTTP_PORT=3503
+      - DAPR_GRPC_PORT=50003
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
 
-volumes:
-  redis_data:
-    driver: local
-  postgres_data:
-    driver: local
-
-networks:
-  compliance-network:
-    driver: bridge
-
-# Usage:
-# Basic infrastructure only: docker-compose up -d redis postgres
-# Full containerized setup: docker-compose --profile containerized up -d
-# Development mode: Use ./scripts/start-all.sh for Dapr-enabled local development
+  harvester-agent-daprd:
+    image: "daprio/daprd:1.12.0"
+    container_name: compliance-harvester-agent-daprd
+    command:
+      - "./daprd"
+      - "-app-id"
+      - "harvester-insights-agent"
+      - "-app-port"
+      - "9180"
+      - "-dapr-http-port"
+      - "3503"
+      - "-dapr-grpc-port"
+      - "50003"
+      - "-placement-host-address"
+      - "placement:50005"
+      - "-resources-path"
+      - "/components"
+    volumes:
+      - "./infrastructure/dapr-components/:/components"
+    depends_on:
+      - harvester-agent
+    network_mode: "service:harvester-agent"
+    restart: on-failure
