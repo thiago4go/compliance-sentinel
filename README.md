@@ -197,8 +197,8 @@ kubectl get pods -n compliance-sentinel
 
 ## Team Members
 
-- [Your Name](https://github.com/thiago4go) 
-- [Team Member 2](https://github.com/makaracc)
+- [Thiago](https://github.com/thiago4go) 
+- [Makara](https://github.com/makaracc)
 
 ## License
 
