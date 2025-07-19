@@ -46,16 +46,16 @@ graph TD
         H --> J(PostgreSQL Database)
     end
 
-    style A fill:#f9f,stroke:#333,stroke-width:2px
-    style B fill:#bbf,stroke:#333,stroke-width:2px
-    style C fill:#bbf,stroke:#333,stroke-width:2px
-    style D fill:#bbf,stroke:#333,stroke-width:2px
-    style E fill:#bbf,stroke:#333,stroke-width:2px
-    style F fill:#f9f,stroke:#333,stroke-width:2px
-    style G fill:#ccf,stroke:#333,stroke-width:2px
-    style H fill:#ccf,stroke:#333,stroke-width:2px
-    style I fill:#afa,stroke:#333,stroke-width:2px
-    style J fill:#afa,stroke:#333,stroke-width:2px
+    style A fill:#e77fe7,stroke:#333,stroke-width:2px
+    style B fill:#7979d2,stroke:#333,stroke-width:2px
+    style C fill:#7979d2,stroke:#333,stroke-width:2px
+    style D fill:#7979d2,stroke:#333,stroke-width:2px
+    style E fill:#7979d2,stroke:#333,stroke-width:2px
+    style F fill:#e77fe7,stroke:#333,stroke-width:2px
+    style G fill:#8080dd,stroke:#333,stroke-width:2px
+    style H fill:#8080dd,stroke:#333,stroke-width:2px
+    style I fill:#6cd86c,stroke:#333,stroke-width:2px
+    style J fill:#6cd86c,stroke:#333,stroke-width:2px
 ```
 
 ### Distributed Thinking and Dapr's Role
