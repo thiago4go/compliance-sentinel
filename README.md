@@ -96,12 +96,23 @@ By embracing Dapr, we've built a system where each component can be developed, d
 
 To showcase Compliance Sentinel in action, please refer to the following:
 
+*  **Video Presentation**: 
+    *  *This video showcases the overall motivation for of this project, architecture, and how Dapr building blocks are utilized.*
+    *   [Presentation Video Link](https://youtu.be/1BBPAFr6G14)
+
 *   **Demo Video**: 
     *   *This video will demonstrate the user interaction, agent behavior, and how Dapr building blocks are utilized throughout the workflow.*
+    *   [Demo Video Link](https://youtu.be/fu5w2F7K8B8)
+
 
 *   **Screenshots**:
 
-    *   *Visuals of the conversational interface and key compliance insights.*
+    ![Screenshot 2025-07-19 141859](Screenshot%202025-07-19%20141859.png)
+    ![Screenshot 2025-07-19 141829](Screenshot%202025-07-19%20141829.png)
+    ![Screenshot 2025-07-19 141801](Screenshot%202025-07-19%20141801.png)
+    ![Screenshot 2025-07-19 135605](Screenshot%202025-07-19%20135605.png)
+    ![Screenshot 2025-07-19 135447](Screenshot%202025-07-19%20135447.png)
+
 
 ### 🚀 Try It Out!
 
