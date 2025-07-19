@@ -10,8 +10,20 @@ import uvicorn
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
-dotenv_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'hackathon-dapr', '.env')
-load_dotenv(dotenv_path)
+dotenv_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '../.env')
+print(f"Looking for .env file at: {dotenv_path}")
+if os.path.exists(dotenv_path):
+    load_dotenv(dotenv_path)
+    print("✅ .env file loaded successfully")
+else:
+    print(f"⚠️ .env file not found at {dotenv_path}")
+    # Try alternative paths
+    alt_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
+    if os.path.exists(alt_path):
+        load_dotenv(alt_path)
+        print(f"✅ .env file loaded from alternative path: {alt_path}")
+    else:
+        print("⚠️ Could not find .env file in any location")
 
 # Disable telemetry to avoid trace-loop issues
 os.environ["LITERAL_API_KEY"] = ""
@@ -131,6 +143,7 @@ async def lifespan(app: FastAPI):
     if OPENAI_AVAILABLE:
         try:
             openai_key = os.getenv("OPENAI_API_KEY")
+            print(f"OpenAI API Key available: {'Yes' if openai_key else 'No'}")
             if openai_key:
                 openai_client = OpenAI(api_key=openai_key)
                 logger.info("✅ OpenAI client initialized")

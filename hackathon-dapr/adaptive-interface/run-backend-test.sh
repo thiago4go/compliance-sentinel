@@ -3,7 +3,14 @@
 # Set up environment
 echo "Setting up environment..."
 cd "$(dirname "$0")"
-source ../.env
+ENV_FILE="../.env"
+if [ -f "$ENV_FILE" ]; then
+    echo "Loading environment from $ENV_FILE"
+    source "$ENV_FILE"
+else
+    echo "Error: $ENV_FILE not found!"
+    exit 1
+fi
 
 # Check if OpenAI API key is available
 if [ -z "$OPENAI_API_KEY" ]; then
