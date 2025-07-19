@@ -1,5 +1,4 @@
 # Dapr Agents Framework
-dapr-agents>=0.2.0
 
 # Dapr SDK for pub/sub and service invocation
 dapr>=1.12.0

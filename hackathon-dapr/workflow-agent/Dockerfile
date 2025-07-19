@@ -24,5 +24,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:9170/health || exit 1
 
 # Run the application
-CMD ["dapr", "run", "--app-id", "workflow-agent", "--app-port", "9170", "--", "python", "workflow_agent.py"]
+CMD ["python", "workflow_agent.py"]
 

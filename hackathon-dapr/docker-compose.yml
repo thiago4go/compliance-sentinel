@@ -13,7 +13,7 @@ volumes:
 services:
   # Dapr Placement Service - Required for Workflows and Actors
   placement:
-    image: "daprio/dapr:1.12.0"
+    image: "daprio/dapr:1.15.0"
     container_name: compliance-placement
     command: ["./placement", "-port", "50005"]
     ports:
@@ -48,9 +48,9 @@ services:
     image: postgres:15-alpine
     container_name: compliance-postgres
     environment:
-      POSTGRES_DB: compliance_sentinel
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres123
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
     ports:
       - "5432:5432"
@@ -60,33 +60,79 @@ services:
     networks:
       - compliance-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d compliance_sentinel"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  # Adaptive Interface Agent (Chainlit UI)
-  adaptive-interface:
+  # Adaptive Interface Frontend (Chainlit UI)
+  adaptive-interface-frontend:
     build:
-      context: ./adaptive-interface/backend
+      context: ./adaptive-interface/frontend
       dockerfile: Dockerfile
-    container_name: compliance-adaptive-interface
-    
+    container_name: compliance-adaptive-interface-frontend
+    ports:
+      - "9150:9150" # Expose Chainlit UI port
     networks:
       - compliance-network
     restart: on-failure
+    env_file:
+      - ../.env
     environment:
-      - DAPR_HTTP_PORT=3501
-      - DAPR_GRPC_PORT=50001
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DAPR_HTTP_PORT=3500 # Dapr sidecar HTTP port for frontend
+      - DAPR_GRPC_PORT=50000 # Dapr sidecar gRPC port for frontend
 
-  adaptive-interface-daprd:
-    image: "daprio/daprd:1.12.0"
-    container_name: compliance-adaptive-interface-daprd
+  adaptive-interface-frontend-daprd:
+    image: "daprio/dapr:1.15.0"
+    container_name: compliance-adaptive-interface-frontend-daprd
     command:
       - "./daprd"
       - "-app-id"
-      - "adaptive-interface"
+      - "adaptive-interface-frontend"
+      - "-app-port"
+      - "9150"
+      - "-dapr-http-port"
+      - "3500"
+      - "-dapr-grpc-port"
+      - "50000"
+      - "-placement-host-address"
+      - "placement:50005"
+      - "-resources-path"
+      - "/components"
+    volumes:
+      - "./infrastructure/dapr-components/:/components"
+    depends_on:
+      - adaptive-interface-frontend
+    network_mode: "service:adaptive-interface-frontend"
+    restart: on-failure
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3500/v1.0/healthz || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Adaptive Interface Backend (FastAPI for Dapr interactions)
+  adaptive-interface-backend:
+    build:
+      context: ./adaptive-interface/backend
+      dockerfile: Dockerfile
+    container_name: compliance-adaptive-interface-backend
+    networks:
+      - compliance-network
+    restart: on-failure
+    env_file:
+      - ../.env
+    environment:
+      - DAPR_HTTP_PORT=3501
+      - DAPR_GRPC_PORT=50001
+
+  adaptive-interface-backend-daprd:
+    image: "daprio/dapr:1.15.0"
+    container_name: compliance-adaptive-interface-backend-daprd
+    command:
+      - "./daprd"
+      - "-app-id"
+      - "adaptive-interface-backend"
       - "-app-port"
       - "9160"
       - "-dapr-http-port"
@@ -97,14 +143,17 @@ services:
       - "placement:50005"
       - "-resources-path"
       - "/components"
-    ports:
-      - "9160:9160" # Expose Chainlit UI port
     volumes:
       - "./infrastructure/dapr-components/:/components"
     depends_on:
-      - adaptive-interface
-    network_mode: "service:adaptive-interface"
+      - adaptive-interface-backend
+    network_mode: "service:adaptive-interface-backend"
     restart: on-failure
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3501/v1.0/healthz || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   # Workflow Agent
   workflow-agent:
@@ -112,16 +161,24 @@ services:
       context: ./workflow-agent
       dockerfile: Dockerfile
     container_name: compliance-workflow-agent
-    
     networks:
       - compliance-network
     restart: on-failure
+    env_file:
+      - ../.env
     environment:
       - DAPR_HTTP_PORT=3502
       - DAPR_GRPC_PORT=50002
+      - DAPR_GRPC_ENDPOINT=compliance-workflow-agent-daprd:50002
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9170/healthz || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 90s
 
   workflow-agent-daprd:
-    image: "daprio/daprd:1.12.0"
+    image: "daprio/dapr:1.15.0"
     container_name: compliance-workflow-agent-daprd
     command:
       - "./daprd"
@@ -141,8 +198,14 @@ services:
       - "./infrastructure/dapr-components/:/components"
     depends_on:
       - workflow-agent
-    network_mode: "service:workflow-agent"
+    networks:
+      - compliance-network
     restart: on-failure
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3502/v1.0/healthz || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   # Harvester Insights Agent
   harvester-agent:
@@ -154,13 +217,20 @@ services:
     networks:
       - compliance-network
     restart: on-failure
+    env_file:
+      - ../.env
     environment:
       - DAPR_HTTP_PORT=3503
       - DAPR_GRPC_PORT=50003
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9180/healthz || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 90s
 
   harvester-agent-daprd:
-    image: "daprio/daprd:1.12.0"
+    image: "daprio/dapr:1.15.0"
     container_name: compliance-harvester-agent-daprd
     command:
       - "./daprd"

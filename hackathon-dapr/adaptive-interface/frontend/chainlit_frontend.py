@@ -14,8 +14,10 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Backend service configuration
-BACKEND_SERVICE_URL = "http://localhost:3502/v1.0/invoke/adaptive-interface-agent/method"
-BACKEND_DIRECT_URL = "http://10.0.0.209:9160"  # Fallback for local testing
+BACKEND_SERVICE_URL = "http://localhost:3500/v1.0/invoke/adaptive-interface-backend/method"
+BACKEND_DIRECT_URL = "http://localhost:9161"  # Fallback for local testing (main.py)
+COMPLIANCE_SERVICE_URL = "http://localhost:3501/v1.0/invoke/compliance-agent-backend/method"
+COMPLIANCE_DIRECT_URL = "http://localhost:9160"  # Fallback for local testing (compliance_agent_service.py)
 
 @cl.on_chat_start
 async def start():
@@ -26,24 +28,26 @@ async def start():
 
     if backend_available:
         welcome_msg = """
-🤖 **Adaptive Compliance Interface**
+# 🛡️ Compliance Sentinel
 
-Welcome! I'm your AI compliance assistant powered by a dedicated Dapr Agent backend, ready to help with:
+Welcome to Compliance Sentinel! I'm your intelligent compliance assistant powered by a distributed multi-agent system built with Dapr Workflows and AI.
 
-📄 **Document Analysis** - Upload and analyze compliance documents
-🔍 **Regulatory Research** - Find relevant regulations and requirements
-📋 **Strategic Planning** - Develop compliance strategies and action plans
-❓ **Expert Guidance** - Get answers to compliance questions
-🎯 **Risk Assessment** - Identify and mitigate compliance risks
+I can help you with:
 
-**What can I help you with today?**
+📋 **Regulatory Expertise** - Navigate complex frameworks like GDPR, SOX, ISO 27001, and HIPAA
+🔍 **Compliance Analysis** - Identify gaps and provide actionable recommendations
+📄 **Document Review** - Analyze policies against regulatory requirements
+🗺️ **Strategic Planning** - Develop comprehensive compliance roadmaps
+🔄 **Continuous Monitoring** - Stay updated on regulatory changes
 
-✅ Backend Service: **CONNECTED**
-🔧 Architecture: **Microservices** (Frontend ↔ Dapr ↔ Backend)
+What compliance challenge can I help you with today?
+
+✅ System Status: All agents connected and operational
+🏗️ Architecture: Distributed multi-agent system with Dapr Workflow orchestration
 """
     else:
         welcome_msg = """
-🤖 **Adaptive Compliance Interface**
+# 🛡️ Compliance Sentinel
 
 ⚠️ **Backend Service Unavailable**
 
@@ -97,8 +101,7 @@ async def main(message: cl.Message):
 
             # Prepare the request payload
             payload = {
-                "message": message.content,
-                "session_id": cl.user_session.get("session_id")
+                "message": message.content
             }
 
             # Try Dapr service invocation first
@@ -108,7 +111,7 @@ async def main(message: cl.Message):
                 step.output = "✅ Response received from backend"
 
                 # Display agent availability status
-                agent_status = "🤖 AI Agent" if response_data.get("agent_available") else "📝 Basic Mode"
+                agent_status = "🤖 Adaptive Compliance Agent" if response_data.get("agent_available") else "📝 Basic Mode"
 
                 # Send the response
                 full_response = f"{response_data['response']}\n\n---\n*{agent_status}*"
@@ -132,7 +135,7 @@ async def call_backend_service(payload: dict) -> Optional[dict]:
     try:
         async with aiohttp.ClientSession() as session:
             async with session.post(
-                f"{BACKEND_SERVICE_URL}/query",
+                f"{BACKEND_SERVICE_URL}/chat",
                 json=payload,
                 headers={"Content-Type": "application/json"},
                 timeout=30
@@ -148,7 +151,7 @@ async def call_backend_service(payload: dict) -> Optional[dict]:
     try:
         async with aiohttp.ClientSession() as session:
             async with session.post(
-                f"{BACKEND_DIRECT_URL}/query",
+                f"{BACKEND_DIRECT_URL}/chat",
                 json=payload,
                 headers={"Content-Type": "application/json"},
                 timeout=30

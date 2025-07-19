@@ -2,7 +2,7 @@
   "mcpServers": {
     "rag-memory": {
     "command": "node",
-        "args": ["/workspaces/compliance-sentinel/mcp-servers/rag-memory-mcp-postgresql/dist/index.js"],
+        "args": ["./mcp-servers/rag-memory-mcp-postgresql/dist/index.js"],
             "env": {
           "DB_TYPE": "postgresql",
           "PG_HOST": "ep-odd-rice-a7lcfyr6-pooler.ap-southeast-2.aws.neon.tech",

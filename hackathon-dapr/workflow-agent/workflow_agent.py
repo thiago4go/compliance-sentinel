@@ -1,10 +1,11 @@
-from dapr.ext.workflow import WorkflowApp, workflow, task
+from dapr.ext.workflow import WorkflowRuntime
 from dapr.clients import DaprClient
 import json
+import time
 
-app = WorkflowApp()
+wfr = WorkflowRuntime()
 
-@workflow(name="compliance_workflow")
+@wfr.workflow(name="compliance_workflow")
 def compliance_workflow(ctx, input: dict):
     # 1. Start the harvesting process
     harvest_task = ctx.call_activity(harvest_insights, input=input)
@@ -27,7 +28,7 @@ def compliance_workflow(ctx, input: dict):
 
     return "Compliance check complete."
 
-@task(name="harvest_insights")
+@wfr.activity(name="harvest_insights")
 def harvest_insights(ctx, input: dict) -> dict:
     with DaprClient() as d:
         # Invoke the harvester-insights-agent service
@@ -38,20 +39,18 @@ def harvest_insights(ctx, input: dict) -> dict:
         )
     return json.loads(response.data)
 
-@app.subscribe(pubsub_name="messagebus", topic="harvester-complete")
 def harvester_complete_subscriber(event_data):
     with DaprClient() as d:
         # In a real-world scenario, you would use the assessment_id to correlate the
         # results with the correct workflow instance.
         print(f"Received harvester complete event: {event_data}")
 
-@task(name="store_results")
+@wfr.activity(name="store_results")
 def store_results(ctx, input: dict):
     # Logic to store results in PostgreSQL
     print(f"Storing results: {input}")
     pass
 
-@app.subscribe(pubsub_name="messagebus", topic="new-request")
 def new_request_subscriber(event_data):
     with DaprClient() as d:
         instance_id = d.start_workflow(
@@ -60,3 +59,11 @@ def new_request_subscriber(event_data):
             input=event_data
         )
     print(f"Started workflow: {instance_id}")
+
+if __name__ == "__main__":
+    print("Starting Dapr Workflow runtime...")
+    wfr.start()
+    print("Dapr Workflow runtime started.")
+    while True:
+        time.sleep(1)
+

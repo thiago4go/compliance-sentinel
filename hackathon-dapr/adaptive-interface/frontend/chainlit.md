@@ -1,30 +1,39 @@
-# 🤖 Adaptive Compliance Interface
+# 🛡️ Compliance Sentinel
 
-Welcome to your intelligent compliance assistant! This modern chat interface connects to a dedicated AI agent backend through Dapr service mesh.
+Welcome to Compliance Sentinel, your intelligent compliance assistant powered by a distributed multi-agent system built with Dapr! Our advanced architecture connects specialized AI agents through Dapr's resilient service mesh.
 
-## 🎯 What I Can Help With
+## 🎯 Compliance Intelligence at Your Service
 
-- **📋 Regulatory Compliance** - GDPR, SOX, ISO 27001, HIPAA guidance
-- **🔍 Risk Assessment** - Identify and mitigate compliance risks
-- **📄 Document Analysis** - Review policies and procedures
-- **💡 Strategic Planning** - Develop compliance roadmaps
-- **🎓 Training Support** - Compliance education and best practices
+- **📋 Regulatory Framework Analysis** - GDPR, SOX, ISO 27001, HIPAA expertise with actionable insights
+- **🔍 Risk Assessment & Gap Analysis** - Identify compliance gaps with prioritized recommendations
+- **📄 Document Analysis** - Review policies against regulatory requirements with AI-powered insights
+- **💡 Strategic Compliance Planning** - Develop comprehensive roadmaps with milestone tracking
+- **🔄 Continuous Compliance Monitoring** - Stay updated on regulatory changes and their impact
 
-## 🏗️ Architecture
+## 🏗️ Distributed Architecture
 
-This application uses a **microservices architecture**:
+Our solution leverages a fault-tolerant, event-driven architecture:
 
 ```
-Frontend (Chainlit) ↔ Dapr Service Mesh ↔ Backend (AI Agent)
+User → Chainlit UI → Adaptive Interface Agent → Dapr Workflow → Specialized Agents
+                                                    ↓
+                                           Persistent State (Redis)
+                                                    ↓
+                                           Compliance Database
 ```
 
-- **Frontend**: Modern chat interface on port 9150
-- **Backend**: Dedicated AI agent service on port 9160
-- **Dapr**: Service mesh handling communication and state
+- **Frontend**: Intuitive Chainlit conversational interface
+- **Adaptive Interface Agent**: Intelligent request routing and response management
+- **Workflow Orchestration**: Fault-tolerant Dapr Workflows for complex compliance processes
+- **Specialized Agents**: Purpose-built compliance experts working collaboratively
+- **Persistent State**: Durable workflows with Redis-backed state management
 
-## 🚀 Ready to Start?
+## 🚀 Experience the Difference
 
-Ask me anything about compliance! Try questions like:
-- "Help me understand GDPR requirements"
-- "What are the key ISO 27001 controls?"
-- "How do I prepare for a SOX audit?"
+Ask me anything about compliance! Try these examples:
+
+- "Analyze our current GDPR compliance posture"
+- "What are the key ISO 27001 controls for a fintech company?"
+- "Help me prepare for our upcoming SOX audit"
+- "Create a compliance roadmap for HIPAA implementation"
+- "What regulatory changes should we monitor in the healthcare sector?"

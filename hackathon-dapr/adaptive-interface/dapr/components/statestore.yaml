@@ -1,14 +1,14 @@
 apiVersion: dapr.io/v1alpha1
 kind: Component
 metadata:
-  name: messagebus
+  name: agentstatestore
 spec:
-  type: pubsub.redis
+  type: state.redis
   version: v1
   metadata:
   - name: redisHost
-    value: redis:6379
+    value: localhost:6379
   - name: redisPassword
     value: ""
-  - name: consumerID
-    value: "compliance-sentinel"
+  - name: actorStateStore
+    value: "true"

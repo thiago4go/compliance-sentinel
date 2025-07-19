@@ -8,7 +8,8 @@ import httpx
 from dotenv import load_dotenv
 
 # Load environment variables
-load_dotenv()
+dotenv_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
+load_dotenv(dotenv_path)
 
 async def test_openai_credentials():
     """Test OpenAI API credentials"""

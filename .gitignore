@@ -35,6 +35,7 @@ tokens.txt
 .secrets
 credentials.ini
 venv/
+venv_frontend/
 
 # Temporary secret files
 temp-secrets.*

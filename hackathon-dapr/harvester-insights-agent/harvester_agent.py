@@ -20,18 +20,11 @@ os.environ["LITERAL_DISABLE"] = "true"
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Try to import dapr-agents and related components
-try:
-    from dapr_agents import DurableAgent
-    from dapr_agents.memory import ConversationDaprStateMemory
-    from dapr_agents.llm import OpenAIChatClient
-    from dapr_agents.mcp import MCPClient
-    from dapr_agents.tools import AgentTool
-    DAPR_AGENTS_AVAILABLE = True
-    logger.info("Dapr-agents imported successfully")
-except Exception as e:
-    DAPR_AGENTS_AVAILABLE = False
-    logger.warning(f"Dapr-agents not available: {e}")
+from dapr_agents import DurableAgent
+from dapr_agents.memory import ConversationDaprStateMemory
+from dapr_agents.llm import OpenAIChatClient
+import dapr_agents.mcp as mcp_module
+from dapr_agents.tools import AgentTool
 
 # Try to import Dapr SDK for pub/sub
 try:
@@ -106,43 +99,39 @@ class EnhancedHarvesterAgent:
             return
             
         try:
-            if DAPR_AGENTS_AVAILABLE:
-                # Initialize Dapr Agent
-                self.agent = DurableAgent(
-                    name=self.name,
-                    role=self.role,
-                    instructions=[
-                        "You are a Compliance Insight Harvester specialized in gathering and analyzing regulatory intelligence.",
-                        "You extract insights from various sources including regulatory updates, industry benchmarks, and risk assessments.",
-                        "You provide actionable intelligence for compliance decision-making.",
-                        "You focus on practical, implementable recommendations for SMB companies.",
-                        "You prioritize high-impact, low-effort compliance improvements.",
-                        "Use web search tools to find current and relevant information.",
-                        "Focus on factual, verifiable information from authoritative sources.",
-                        "Provide structured responses with clear sections and citations."
-                    ],
-                    # LLM configuration
-                    llm=OpenAIChatClient(
-                        api_key=os.getenv("OPENROUTER_API_KEY"),
-                        base_url=os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1"),
-                        model=os.getenv("OPENROUTER_MODEL", "openai/gpt-4o")
-                    ) if os.getenv("OPENROUTER_API_KEY") else None,
-                    # Memory configuration
-                    memory=ConversationDaprStateMemory(
-                        store_name="conversationstore",
-                        session_id="harvester-default"
-                    ),
-                    # Dapr configuration
-                    message_bus_name="messagepubsub",
-                    state_store_name="workflowstatestore",
-                    agents_registry_store_name="agentstatestore",
-                    tools=[]  # Will be populated with MCP tools
-                )
-                
-                # Initialize MCP client
-                await self.initialize_mcp_client()
-                
-                logger.info("Dapr Agent initialized successfully")
+            # Initialize Dapr Agent
+            self.agent = DurableAgent(
+                name=self.name,
+                role=self.role,
+                instructions=[
+                    "You are a Compliance Insight Harvester specialized in gathering and analyzing regulatory intelligence.",
+                    "You extract insights from various sources including regulatory updates, industry benchmarks, and risk assessments.",
+                    "You provide actionable intelligence for compliance decision-making.",
+                    "You focus on practical, implementable recommendations for SMB companies.",
+                    "You prioritize high-impact, low-effort compliance improvements.",
+                    "Use web search tools to find current and relevant information.",
+                    "Focus on factual, verifiable information from authoritative sources.",
+                    "Provide structured responses with clear sections and citations.",
+                ],
+                # LLM configuration
+                llm=OpenAIChatClient(
+                    api_key=os.getenv("OPENAI_API_KEY"),
+                    model=os.getenv("OPENAI_MODEL", "gpt-4o")
+                ) if os.getenv("OPENAI_API_KEY") else None,
+                # Memory configuration
+                memory=ConversationDaprStateMemory(
+                    store_name="conversationstore",
+                    session_id="harvester-default"
+                ),
+                # Dapr configuration
+                message_bus_name="messagepubsub",
+                state_store_name="workflowstatestore",
+                agents_registry_store_name="agentstatestore",
+                tools=[]  # Will be populated with MCP tools
+            )
+            # Initialize MCP client
+            await self.initialize_mcp_client()
+            logger.info("Dapr Agent initialized successfully")
             
             # Initialize Dapr SDK client for pub/sub
             if DAPR_SDK_AVAILABLE:
@@ -159,7 +148,7 @@ class EnhancedHarvesterAgent:
         """Initialize MCP client for web search tools"""
         try:
             # Initialize MCP client
-            self.mcp_client = MCPClient(persistent_connections=False)
+            self.mcp_client = mcp_module.MCPClient(persistent_connections=False)
             
             # Get MCP server configuration
             mcp_url = os.getenv("MCP_SERVER_URL", "http://localhost:8080/mcp")
@@ -301,8 +290,7 @@ class EnhancedHarvesterAgent:
             search_result = await self.search_web(search_query, request.max_results or 10)
             
             # Process with AI agent if available
-            if self.agent and DAPR_AGENTS_AVAILABLE:
-                enhanced_query = f"""
+            enhanced_query = f"""
                 Analyze compliance requirements for {request.framework} framework.
                 Company: {request.company_name}
                 Industry: {request.industry or 'General'}
@@ -328,11 +316,6 @@ class EnhancedHarvesterAgent:
                 
                 # Parse agent response into structured insights
                 insights = self.parse_agent_response(response_content, request.framework)
-                
-            else:
-                # Fallback to rule-based insights
-                insights = self.generate_rule_based_insights(request)
-                response_content = f"Generated {len(insights)} compliance insights for {request.framework}"
             
             # Calculate processing time
             processing_time = int((datetime.now() - start_time).total_seconds() * 1000)
@@ -543,6 +526,12 @@ async def lifespan(app: FastAPI):
         harvester_agent = EnhancedHarvesterAgent()
         await harvester_agent.initialize()
         logger.info("Enhanced harvester agent initialized successfully")
+
+        if DAPR_SDK_AVAILABLE:
+            # Start Dapr gRPC app in a background task
+            asyncio.create_task(dapr_app.run())
+            logger.info("Dapr gRPC app started in background.")
+
     except Exception as e:
         logger.error(f"Error initializing harvester agent: {e}")
         harvester_agent = None
@@ -768,7 +757,6 @@ async def get_metrics():
         "mcp_tools_available": len(harvester_agent.mcp_tools),
         "dapr_components": {
             "pub_sub": DAPR_SDK_AVAILABLE,
-            "state_store": DAPR_AGENTS_AVAILABLE,
             "service_invocation": DAPR_SDK_AVAILABLE
         },
         "capabilities": {
